@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+        "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+        "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+
+	<!-- 타일즈 비적용 -->
+	<definition name="single" template="/WEB-INF/tiles/single/layout.jsp">
+		<put-attribute name="contents" value="" />
+	</definition>
+	<definition name="/site/intro" extends="single">
+		<put-attribute name="contents" value="/WEB-INF/jsp/site/intro.jsp" />
+	</definition>	
+	<definition name="/site/main" extends="single">
+		<put-attribute name="contents" value="/WEB-INF/jsp/site/main.jsp" />
+	</definition>
+	<definition name="/site/popup" extends="single">
+		<put-attribute name="contents" value="/WEB-INF/jsp/site/popup.jsp" />
+	</definition>	
+	
+	<!-- 사용자 레이아웃 -->
+	<definition name="site" template="/WEB-INF/tiles/site/site-layout.jsp">
+		<put-attribute name="header" value="/WEB-INF/tiles/site/site-header.jsp" />
+		<put-attribute name="contents" value="" />
+		<put-attribute name="footer" value="/WEB-INF/tiles/site/site-footer.jsp" />
+	</definition>
+	<definition name="/site/*" extends="site">
+		<put-attribute name="contents" value="/WEB-INF/jsp/site/{1}.jsp" />
+	</definition>
+	<definition name="/site/*/*" extends="site">
+		<put-attribute name="contents" value="/WEB-INF/jsp/site/{1}/{2}.jsp" />
+	</definition>
+	<definition name="/site/*/*/*" extends="site">
+		<put-attribute name="contents" value="/WEB-INF/jsp/site/{1}/{2}/{3}.jsp" />
+	</definition>
+	
+	<!-- 관리자 레이아웃 -->
+	<definition name="admin" template="/WEB-INF/tiles/admin/admin-layout.jsp">
+		<put-attribute name="header" value="/WEB-INF/tiles/admin/admin-header.jsp" />
+		<put-attribute name="contents" value="" />
+		<put-attribute name="footer" value="/WEB-INF/tiles/admin/admin-footer.jsp" />
+	</definition>
+	<definition name="/admin/*" extends="admin">
+		<put-attribute name="contents" value="/WEB-INF/jsp/admin/{1}.jsp" />
+	</definition>
+	<definition name="/admin/*/*" extends="admin">
+		<put-attribute name="contents" value="/WEB-INF/jsp/admin/{1}/{2}.jsp" />
+	</definition>
+	<definition name="/admin/*/*/*" extends="admin">
+		<put-attribute name="contents" value="/WEB-INF/jsp/admin/{1}/{2}/{3}.jsp" />
+	</definition>
+	
+	<!-- 팝업 타일즈 비적용 -->
+	<definition name="admin_single" template="/WEB-INF/tiles/popup/layout.jsp">
+		<put-attribute name="contents" value="" />
+	</definition>
+	<definition name="/popup/*" extends="admin_single">
+		<put-attribute name="contents" value="/WEB-INF/jsp/popup/{1}.jsp" />
+	</definition>	
+	
+</tiles-definitions>

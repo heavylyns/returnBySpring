@@ -1,0 +1,12 @@
+@charset "utf-8";
+
+.counseling .subgnbwrap  {background:url("/image/counseling/counseling-subbg.gif") no-repeat center top;}
+
+.cirborder-wrap {border:3px solid #eaeaea; border-radius:15px; -webkit-border-radius:15px; -moz-border-radius:15px; padding:30px 20px 30px 50px; font-size: 18px; color: #444; margin-bottom: 50px;}
+.cirborder-wrap .cirtit {padding:55px 0 55px 210px; background: url("/image/counseling/constep-bg.png") no-repeat left center;}
+.cirborder-wrap .cirtit strong {font-size:24px; font-weight: 700;; color: #000;}
+.prestep > li {margin-top: 30px;}
+.prestep > li:first-child {margin-top:0;}
+.prestep dl {display: table; width: 100%;}
+.prestep dt {display: table-cell; width: 332px; height:75px; line-height: 75px; background: url("/image/counseling/constep-stepbg.png") no-repeat left top; text-align: center; font-size: 24px; font-weight: 700; color: #fff;  vertical-align: middle;}
+.prestep dd {display: table-cell; font-size: 17px; color: #444; vertical-align: middle; padding-left: 40px;}

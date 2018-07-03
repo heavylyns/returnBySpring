@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- <!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd"> -->
+<mapper namespace="returnProject.admin.service.impl.AdminBoardMapper">
+	
+	<resultMap id="boardList"  type="returnProject.admin.service.AdminBoardVO">
+		<result column="board_no" property="board_no" />
+		<result column="board_code" property="board_code"/>
+		<result column="board_name" property=""/>
+		<result column="title" property="title"/>
+		<result column="view_cnt" property="view_cnt"/>
+		<result column="status" property="status"/>
+		<result column="writer" property="writer"/>
+		<result column="reg_date" property="reg_date"/>
+		<result column="contents" property="contents" jdbcType="BLOB"/>
+		
+	</resultMap>
+	
+	<!-- 관리자 로그인 -->
+	<!-- <select id="selectReferenceList" resultMap="boardResult"> -->
+	<select id="selectBoardList" parameterType="BoardVO" resultType="AdminBoardVO" >
+	<if test="boardCode == 07">
+	SELECT Z.*, FLOOR((Z.ROWNUM2-1)/3) AS group_num FROM (
+	SELECT X.*, @RNUMN := (@RNUMN + 1) AS ROWNUM2 FROM (
+	</if>
+	SELECT t.*, @RNUM := @RNUM + 1 AS ROWNUM FROM
+	(
+	    SELECT A.BOARD_NO as board_no
+             , A.BOARD_CODE as board_code
+             , A.TITLE as title
+             , A.VIEW_CNT as view_cnt
+             , A.STATUS as status
+             , A.WRITER as writer
+             , A.NAME as name
+             , A.REG_DATE as reg_date
+             , A.CONTENTS as contents
+             , A.ATTACHED_FILE_YN as attached_file_yn
+             , CASE WHEN A.attached_file_cnt = 1 THEN (SELECT CONCAT(FILE_STRE_COURS, STRE_FILE_NM, '.', FILE_EXTSN) FROM R_COMM_FILE_DETAIL WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID)  ELSE NULL END AS attached_file_url
+             , A.DEL_YN 
+             , A.REGION_CODE
+             , A.REGION_NAME
+		 FROM (
+		SELECT A.BOARD_NO AS board_no 
+		     , A.BOARD_CODE AS board_code
+		     , A.TITLE AS title
+		     , A.VIEW_CNT AS view_cnt
+		     <![CDATA[
+		     , CASE WHEN (SELECT COUNT(*) FROM R_REPLY WHERE A.BOARD_NO = BOARD_NO AND DEL_YN = 'N') > 0 THEN 'Y' ELSE 'N' END AS STATUS
+		     , CASE WHEN (SELECT COUNT(*) FROM R_COMM_FILE_DETAIL WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) > 0 THEN 'Y' ELSE 'N' END AS  attached_file_yn
+		     ]]>  
+		     , A.WRITER AS writer
+		     , IFNULL(C.NAME, B.NAME) AS name
+		     , DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS reg_date
+		     , CONVERT(A.CONTENTS USING utf8) AS contents
+		     , (SELECT COUNT(*) FROM R_COMM_FILE_DETAIL WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) AS attached_file_cnt 
+			 , A.ATTACHED_FILE_ID AS attached_file_id
+			 , A.DEL_YN 
+			 , A.REGION_CODE 
+			 , (SELECT REGION_NAME FROM R_REGION_TABLE WHERE A.REGION_CODE = REGION_CODE) AS REGION_NAME
+		  FROM R_BOARD A LEFT JOIN R_MEMBER B ON A.WRITER = B.ID 
+		  				 LEFT JOIN R_ADMIN C  ON A.WRITER = C.ID
+		 WHERE 1=1
+	 	 <if test="searchWrd != null and searchWrd != ''"><!-- searchCnd -->
+			<if test="searchCnd != null and searchCnd != ''">
+				<if test="searchCnd == 3">
+					AND A.TITLE LIKE CONCAT ('%', #{searchWrd},'%') OR A.CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') OR A.WRITER LIKE CONCAT ('%', #{searchWrd},'%')
+				</if>
+				<if test="searchCnd == 0">
+					AND A.TITLE LIKE CONCAT ('%', #{searchWrd},'%')
+				</if>
+				<if test="searchCnd == 1">
+					AND A.CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') 
+				</if>
+				<if test="searchCnd == 2">
+					AND A.WRITER LIKE CONCAT ('%', #{searchWrd},'%')
+				</if>
+			</if>
+		</if>
+		<if test="regionCode != null and regionCode != ''">
+			AND A.REGION_CODE =  #{regionCode}
+		</if>
+		) A
+		ORDER BY A.BOARD_NO ASC
+		) t, ( SELECT @RNUM := 0 ) R
+		WHERE t.BOARD_CODE = #{boardCode} AND t.DEL_YN = 'N'
+		ORDER BY ROWNUM DESC
+		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+		<if test="boardCode == 07">
+		  ) X
+		  , (SELECT @RNUMN := 0 ) Y
+		  )Z
+		</if>
+	</select>
+	<select id="selectBoardListCnt" parameterType="BoardVO" resultType="java.lang.Integer">
+	SELECT COUNT(*) FROM
+	(
+		SELECT A.BOARD_NO AS board_no 
+		     , A.BOARD_CODE AS board_code
+		     , A.TITLE AS title
+		     , A.VIEW_CNT AS view_cnt
+		     , A.WRITER AS writer
+		     , DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS reg_date
+		     , CONVERT(A.CONTENTS USING utf8) AS contents
+		     , A.DEL_YN
+		  FROM R_BOARD A
+		 WHERE 1=1
+	 	<if test="searchWrd != null and searchWrd != ''"><!-- searchCnd -->
+			<if test="searchCnd != null and searchCnd != ''">
+				<if test="searchCnd == 3">
+					AND A.TITLE LIKE CONCAT ('%', #{searchWrd},'%') OR A.CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') OR A.WRITER LIKE CONCAT ('%', #{searchWrd},'%')
+				</if>
+				<if test="searchCnd == 0">
+					AND A.TITLE LIKE CONCAT ('%', #{searchWrd},'%')
+				</if>
+				<if test="searchCnd == 1">
+					AND A.CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') 
+				</if>
+				<if test="searchCnd == 2">
+					AND A.WRITER LIKE CONCAT ('%', #{searchWrd},'%')
+				</if>
+			</if>
+			
+		</if>
+		<if test="regionCode != null and regionCode != ''">
+			AND A.REGION_CODE =  #{regionCode}
+		</if>
+		ORDER BY BOARD_NO
+		) t
+		WHERE t.BOARD_CODE = #{boardCode} AND t.DEL_YN = 'N'
+	</select>
+	<select id="selectBoardArticle" parameterType="BoardVO" resultType="AdminBoardVO">
+		SELECT A.BOARD_NO AS board_no 
+		     , A.BOARD_CODE AS board_code
+		     , A.TITLE AS title
+		     , A.VIEW_CNT AS view_cnt
+		     , A.WRITER AS writer
+		     , IFNULL(C.NAME, B.NAME) AS name
+		     , DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS reg_date
+		     , CONVERT(A.CONTENTS USING utf8) AS contents
+		     <!-- , A.CONTENTS AS contents -->
+		     , A.DEL_YN
+		     , A.ATTACHED_FILE_ID AS attached_file_id
+		     <![CDATA[
+             , (SELECT BOARD_NO FROM R_BOARD WHERE BOARD_CODE = #{boardCode} AND DEL_YN = 'N' AND BOARD_NO < #{boardNo}  ORDER BY BOARD_NO DESC LIMIT 1) AS prev_no
+             , (SELECT TITLE FROM R_BOARD WHERE BOARD_CODE = #{boardCode} AND DEL_YN = 'N' AND BOARD_NO < #{boardNo}  ORDER BY BOARD_NO DESC LIMIT 1) AS prev_title
+             , (SELECT BOARD_NO FROM R_BOARD WHERE BOARD_CODE = #{boardCode} AND DEL_YN = 'N' AND BOARD_NO > #{boardNo}  ORDER BY BOARD_NO ASC LIMIT 1) AS next_no
+             , (SELECT TITLE FROM R_BOARD WHERE BOARD_CODE = #{boardCode} AND DEL_YN = 'N' AND BOARD_NO > #{boardNo}  ORDER BY BOARD_NO ASC LIMIT 1) AS next_title
+             , CASE WHEN (SELECT COUNT(*) FROM R_REPLY WHERE A.BOARD_NO = BOARD_NO AND DEL_YN = 'N') > 0 THEN 'Y' ELSE 'N' END AS STATUS
+             ]]>  
+             , A.REGION_CODE AS region_code
+             , (SELECT REGION_NAME FROM R_REGION_TABLE WHERE A.REGION_CODE = REGION_CODE) AS region_name
+		  FROM R_BOARD A LEFT JOIN R_MEMBER B ON A.WRITER = B.ID
+		  				 LEFT JOIN R_ADMIN C  ON A.WRITER = C.ID
+		 WHERE A.BOARD_CODE = #{boardCode}
+		   AND A.BOARD_NO = #{boardNo}
+		   AND A.DEL_YN = 'N'
+	</select>
+	<update id="boardViewUpdate" parameterType="BoardVO">
+		UPDATE R_BOARD
+		   SET VIEW_CNT = IFNULL(VIEW_CNT, 0) + 1
+		 WHERE BOARD_CODE = #{boardCode} AND BOARD_NO = #{boardNo}
+	</update>
+	<insert id="boardInsert" parameterType="AdminBoardVO">
+		INSERT INTO R_BOARD 
+		(BOARD_NO, BOARD_CODE, TITLE, CONTENTS, WRITER, REG_DATE, DEL_YN, ATTACHED_FILE_ID, UPDATE_DATE, UPDATE_WRITER<if test="(board_code == '03' or board_code == '09') and region_code != null">, REGION_CODE</if>)
+		SELECT IFNULL(MAX(BOARD_NO)+1, 1), #{board_code}, #{title}, #{contents}, #{writer}, SYSDATE(), 'N', #{attached_file_id}, SYSDATE(), #{writer} <if test="(board_code == '03' or board_code == '09') and region_code != null">, #{region_code}</if> FROM R_BOARD 
+	</insert>
+	<update id="boardUpdate" parameterType="AdminBoardVO">
+		UPDATE R_BOARD
+		   SET TITLE = #{title},
+		   	   CONTENTS = #{contents},
+		   	   <if test="attached_file_id != null and attached_file_id != ''">
+		   	   ATTACHED_FILE_ID = #{attached_file_id},
+		   	   </if>
+		   	   <if test="(board_code == '03' or board_code == '09') and region_code != null">
+		   	   REGION_CODE = #{region_code},
+		   	   </if>
+		   	   UPDATE_DATE = SYSDATE(),
+		   	   UPDATE_WRITER = #{writer}
+		 WHERE BOARD_CODE = #{board_code} AND BOARD_NO = #{board_no}
+	</update>
+	<update id="boardDelete" parameterType="AdminBoardVO">
+		UPDATE R_BOARD
+		   SET DEL_YN ='Y'
+		     , UPDATE_DATE = SYSDATE()
+		   	 , UPDATE_WRITER = #{writer}
+		 WHERE BOARD_CODE = #{board_code} AND BOARD_NO = #{board_no}
+	</update>
+	<select id="regionCombo" parameterType="BoardVO" resultType="AdminBoardVO" >
+		SELECT REGION_CODE AS region_code
+			 , REGION_NAME AS region_name
+		  FROM R_REGION_TABLE
+	</select>
+	<insert id="replyInsert" parameterType="AdminBoardVO">
+		INSERT INTO R_REPLY
+		(BOARD_NO, REPLY_NO, CONTENTS, WRITER, REG_DATE, DEL_YN, ATTACHED_FILE_ID, UPDATE_DATE, UPDATE_WRITER)
+		SELECT #{board_no}, IFNULL(MAX(REPLY_NO)+1, 1), #{contents}, #{writer}, SYSDATE(), 'N', #{attached_file_id}, SYSDATE(), #{writer} FROM R_REPLY 
+	</insert>
+	<select id="selectReplyArticle" parameterType="BoardVO" resultType="AdminBoardVO">
+		SELECT A.BOARD_NO AS board_no 
+		     , A.REPLY_NO AS reply_no
+		     , A.WRITER AS writer
+		     , B.NAME AS name
+		     , DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS reg_date
+		     , CONVERT(A.CONTENTS USING utf8) AS contents
+		     , A.DEL_YN
+		     , A.ATTACHED_FILE_ID AS attached_file_id
+		  FROM R_REPLY A LEFT JOIN R_ADMIN B ON A.WRITER = B.ID
+		 WHERE A.BOARD_NO = #{boardNo}
+		   AND A.DEL_YN = 'N'
+	</select>
+	<update id="replyUpdate" parameterType="AdminBoardVO">
+		UPDATE R_REPLY
+		   SET CONTENTS = #{contents},
+		   	   <if test="attached_file_id != null and attached_file_id != ''">
+		   	   ATTACHED_FILE_ID = #{attached_file_id},
+		   	   </if>
+		   	   UPDATE_DATE = SYSDATE(),
+		   	   UPDATE_WRITER = #{writer}
+		 WHERE BOARD_NO = #{board_no} AND REPLY_NO = #{reply_no}
+	</update>
+	<update id="replyDelete" parameterType="AdminBoardVO">
+		UPDATE R_REPLY
+		   SET DEL_YN ='Y'
+		     , UPDATE_DATE = SYSDATE()
+		   	 , UPDATE_WRITER = #{writer}
+		 WHERE BOARD_NO = #{board_no} 
+		 <if test="reply_no != null and reply_no != ''">
+		   AND REPLY_NO = #{reply_no}
+		  </if>
+	</update>
+	
+</mapper>

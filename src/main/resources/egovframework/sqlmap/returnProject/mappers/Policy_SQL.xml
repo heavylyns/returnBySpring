@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- <!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd"> -->
+<mapper namespace="returnProject.site.policy.service.impl.PolicyMapper">
+	<select id="houseDateData" parameterType="String" resultType="AdminEducationVO" >
+	    	SELECT EDUCATION_NO AS education_no 
+	    	     , HOUSE_CODE AS house_code
+	    	     , EDUCATION_NAME AS education_name
+	    	     , DATE_FORMAT(EDUCATION_START, '%Y-%m-%d') AS education_start
+                 , DATE_FORMAT(EDUCATION_START, '%Y') AS education_start_year
+                 , DATE_FORMAT(EDUCATION_START, '%m') AS education_start_month
+                 , DATE_FORMAT(EDUCATION_START, '%d') AS education_start_day
+	    	     , DATE_FORMAT(EDUCATION_END + INTERVAL 1 DAY, '%Y-%m-%d') AS education_end
+                 , DATE_FORMAT(EDUCATION_END + INTERVAL 1 DAY, '%Y') AS education_end_year
+                 , DATE_FORMAT(EDUCATION_END + INTERVAL 1 DAY, '%m') AS education_end_month
+                 , DATE_FORMAT(EDUCATION_END + INTERVAL 1 DAY, '%d') AS education_end_day
+	    	     , DEL_YN AS del_yn
+	    	     , DATE_FORMAT(REG_DATE, '%Y-%m-%d') AS reg_date
+	    	     , WRITER AS writer
+	    	 FROM R_HOUSE
+	 		 WHERE DEL_YN = 'N' AND HOUSE_CODE = #{house_no}
+	</select>
+</mapper>

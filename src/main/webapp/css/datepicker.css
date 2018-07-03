@@ -1,0 +1,100 @@
+@charset "utf-8";
+
+/* DatePicker Container */
+.ie8 .ui-datepicker {border:1px solid #ddd;}
+.ui-datepicker {
+    width: auto;
+    height: auto;
+    margin: 5px auto 0;
+    -webkit-box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, .2);
+    -moz-box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, .2);
+    box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, .2);
+    position: absolute;
+    top: -9999px;
+}
+.ui-datepicker a {
+    text-decoration: none;
+}
+/* DatePicker Table */
+.ui-datepicker table {
+    width: 100%;
+    font-size:12px;
+}
+.ui-datepicker-header {
+    background:#5269a3;
+    line-height: 36px;
+}
+.ui-datepicker-title {
+    text-align: center;
+    color:#fff;
+}
+.ui-datepicker-prev, .ui-datepicker-next {
+    display: inline-block;
+    width: 35px;
+    height: 35px;
+    text-align: center;
+    cursor: pointer;
+    background: url('/image/common/datepicker-arrow.png') no-repeat;
+    line-height: 1000%;
+    overflow: hidden;
+}
+.ui-datepicker-prev {
+    float: left;
+    background-position: center -27px;
+}
+.ui-datepicker-next {
+    float: right;
+    background-position: center 3px;
+}
+.ui-datepicker thead {
+    background-color: #fff;
+    border-bottom: 1px solid #e4e4e4;
+}
+.ui-datepicker th {
+    font-size: 6pt;
+    padding: 8px 0;
+    color: #666666;
+}
+.ui-datepicker tbody td {
+    padding: 0;
+}
+.ui-datepicker td span, .ui-datepicker td a {
+    display: inline-block;
+    text-align: center;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    color: #666666;
+}
+.ui-datepicker-calendar .ui-state-default {
+    background: #fff;
+}
+.ui-datepicker-calendar .ui-state-hover {
+    background: #f7f7f7;
+}
+.ui-datepicker-calendar .ui-datepicker-today .ui-state-hover {
+    background: #666666;
+    color:#fff;
+}
+.ui-datepicker-calendar .ui-state-active {
+    background: #666666;
+    color:#fff;
+    position: relative;
+}
+.ui-datepicker-unselectable .ui-state-default {
+    background: #f7f7f7;
+    color: #b4b3b3;
+}
+.ui-datepicker-calendar td:first-child .ui-state-active {
+    width: 29px;
+    margin-left: 0;
+}
+.ui-datepicker-calendar td:last-child .ui-state-active {
+    width: 29px;
+    margin-right: 0;
+}
+.ui-datepicker-calendar tr:last-child .ui-state-active {
+    height: 29px;
+    margin-bottom: 0;
+}
+.ui-datepicker-trigger {margin:5px 0 0 5px;}

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- <!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd"> -->
+<mapper namespace="returnProject.admin.service.impl.AdminEducationMapper">
+	<select id="selectReturnHouseList" parameterType="AdminEducationVO" resultType="AdminEducationVO" >
+	
+	SELECT t.*, @RNUM := @RNUM + 1 AS ROWNUM 
+	  FROM (
+	    	SELECT EDUCATION_NO AS education_no 
+	    	     , HOUSE_CODE AS house_code
+	    	     , EDUCATION_NAME AS education_name
+	    	     , DATE_FORMAT(EDUCATION_START, '%Y-%m-%d') AS education_start
+                 , DATE_FORMAT(EDUCATION_START, '%Y') AS education_start_year
+                 , DATE_FORMAT(EDUCATION_START, '%m') AS education_start_month
+                 , DATE_FORMAT(EDUCATION_START, '%d') AS education_start_day
+	    	     , DATE_FORMAT(EDUCATION_END, '%Y-%m-%d') AS education_end
+	    	     , DATE_FORMAT(EDUCATION_END + INTERVAL 1 DAY, '%Y-%m-%d') AS education_end2
+                 , DATE_FORMAT(EDUCATION_END, '%Y') AS education_end_year
+                 , DATE_FORMAT(EDUCATION_END, '%m') AS education_end_month
+                 , DATE_FORMAT(EDUCATION_END, '%d') AS education_end_day
+	    	     , A.DEL_YN AS del_yn
+	    	     , DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS reg_date
+	    	     , A.WRITER AS writer
+	    	     , B.NAME AS name
+	    	  FROM R_HOUSE A LEFT JOIN R_ADMIN B ON A.WRITER = B.ID 
+	 		) t, ( SELECT @RNUM := 0 ) R
+	  WHERE t.HOUSE_CODE = #{house_code} AND t.DEL_YN = 'N'
+	  ORDER BY ROWNUM DESC
+	  LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+	<select id="selectReturnHouseListCnt" parameterType="AdminEducationVO" resultType="java.lang.Integer">
+	SELECT COUNT(*) FROM
+	(
+		SELECT EDUCATION_NO AS education_no  
+	    	     , HOUSE_CODE AS house_code
+	    	     , EDUCATION_NAME AS education_name
+	    	     , EDUCATION_START AS education_start
+	    	     , EDUCATION_END AS education_end
+	    	     , DEL_YN AS del_yn
+	    	     , REG_DATE AS reg_date
+	    	     , WRITER AS writer
+	    	  FROM R_HOUSE
+		) t
+		WHERE t.HOUSE_CODE = #{house_code} AND t.DEL_YN = 'N'
+	</select>
+	<select id="selectReturnHouseArticle" parameterType="AdminEducationVO" resultType="AdminEducationVO">
+	SELECT EDUCATION_NO AS education_no  
+	     , HOUSE_CODE AS house_code
+	     , EDUCATION_NAME AS education_name
+	     , DATE_FORMAT(EDUCATION_START, '%Y-%m-%d') AS education_start
+	     , DATE_FORMAT(EDUCATION_END, '%Y-%m-%d') AS education_end
+	     , DEL_YN AS del_yn
+	     , DATE_FORMAT(REG_DATE, '%Y-%m-%d') AS reg_date
+	     , WRITER AS writer
+	  FROM R_HOUSE
+	 WHERE EDUCATION_NO = #{education_no}
+	</select>
+	<insert id="returnHouseInsert" parameterType="AdminEducationVO">
+		INSERT INTO R_HOUSE
+		(EDUCATION_NO, HOUSE_CODE, EDUCATION_NAME, EDUCATION_START, EDUCATION_END, REG_DATE, DEL_YN, WRITER, UPDATE_DATE, UPDATE_WRITER)
+		SELECT IFNULL(MAX(EDUCATION_NO)+1, 1), #{house_code}, #{education_name}, #{education_start}, #{education_end}, NOW(), 'N', #{writer}, NOW(), #{writer} FROM R_HOUSE 
+	</insert>
+	<update id="returnHouseUpdate" parameterType="AdminEducationVO">
+		UPDATE R_HOUSE
+		   SET HOUSE_CODE = #{house_code}
+		     , EDUCATION_NAME = #{education_name}
+		     , EDUCATION_START = #{education_start}
+		     , EDUCATION_END = #{education_end}
+		     , UPDATE_DATE = NOW()
+		     , UPDATE_WRITER = #{writer}
+		 WHERE EDUCATION_NO = #{education_no}
+	</update>
+		<update id="returnHouseDelete" parameterType="AdminEducationVO">
+		UPDATE R_HOUSE
+		   SET DEL_YN = 'Y'
+		 WHERE EDUCATION_NO = #{education_no}
+	</update>
+
+
+	<select id="selectRegionalEduList" parameterType="AdminEducationVO" resultType="AdminEducationVO" >
+	
+	SELECT t.*, @RNUM := @RNUM + 1 AS ROWNUM 
+	  FROM (
+	    	SELECT R_EDU_NO AS r_edu_no
+	    		 , R_EDU_TITLE AS r_edu_title
+	    		 , DATE_FORMAT(R_EDU_START, '%Y-%m-%d') AS r_edu_start 
+	    		 , DATE_FORMAT(R_EDU_END, '%Y-%m-%d') AS r_edu_end
+	    		 , R_EDU_PLACE AS r_edu_place
+	    		 , R_EDU_TEL AS r_edu_tel
+	    		 , R_EDU_SUMMARY AS r_edu_summary
+	    		 , CONVERT(R_EDU_CONTENTS USING utf8) AS r_edu_contents
+	    		 , ATTACHED_FILE_ID AS attached_file_id
+	    		 , CASE WHEN (SELECT USE_AT FROM R_COMM_FILE WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) = 'Y' THEN 'Y' ELSE 'N' END AS  attached_file_yn
+	    		 , (SELECT COUNT(*) FROM R_COMM_FILE_DETAIL WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) AS attached_file_cnt
+	    		 , REGION_CODE AS region_code
+	    		 , (SELECT REGION_NAME FROM R_REGION_TABLE WHERE A.REGION_CODE = REGION_CODE) AS REGION_NAME
+	    	     , DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS reg_date
+	    	     , A.WRITER AS writer
+	    	     , B.NAME AS name
+	    	     , A.DEL_YN AS del_yn
+	    	  FROM R_REGIONAL_EDU A LEFT JOIN R_ADMIN B ON A.WRITER = B.ID 
+	    	 WHERE 1=1
+		 	 <if test="searchWrd != null and searchWrd != ''"><!-- searchCnd -->
+				<if test="searchCnd != null and searchCnd != ''">
+					<if test="searchCnd == 3">
+						AND A.R_EDU_TITLE LIKE CONCAT ('%', #{searchWrd},'%') OR A.R_EDU_CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') OR A.WRITER LIKE CONCAT ('%', #{searchWrd},'%')
+					</if>
+					<if test="searchCnd == 0">
+						AND A.R_EDU_TITLE LIKE CONCAT ('%', #{searchWrd},'%')
+					</if>
+					<if test="searchCnd == 1">
+						AND A.R_EDU_CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') 
+					</if>
+					<if test="searchCnd == 2">
+						AND A.WRITER LIKE CONCAT ('%', #{searchWrd},'%')
+					</if>
+				</if>
+			</if>
+			<if test="region_code != null and region_code != ''">
+				AND A.REGION_CODE =  #{region_code}
+			</if>
+	 		) t, ( SELECT @RNUM := 0 ) R
+	  WHERE t.DEL_YN = 'N'
+	  ORDER BY ROWNUM DESC
+	  LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+	<select id="selectRegionalEduListCnt" parameterType="AdminEducationVO" resultType="java.lang.Integer">
+	
+	SELECT COUNT(*)
+	  FROM (
+	    	SELECT R_EDU_NO AS r_edu_no
+	    		 , R_EDU_TITLE AS r_edu_title
+	    		 , DATE_FORMAT(R_EDU_START, '%Y-%m-%d') AS r_edu_start 
+	    		 , DATE_FORMAT(R_EDU_END, '%Y-%m-%d') AS r_edu_end
+	    		 , R_EDU_PLACE AS r_edu_place
+	    		 , R_EDU_TEL AS r_edu_tel
+	    		 , R_EDU_SUMMARY AS r_edu_summary
+	    		 , CONVERT(R_EDU_CONTENTS USING utf8) AS r_edu_contents
+	    		 , ATTACHED_FILE_ID AS attached_file_id
+	    		 , CASE WHEN (SELECT USE_AT FROM R_COMM_FILE WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) = 'Y' THEN 'Y' ELSE 'N' END AS  attached_file_yn
+	    		 , (SELECT COUNT(*) FROM R_COMM_FILE_DETAIL WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) AS attached_file_cnt
+	    		 , REGION_CODE AS region_code
+	    		 , (SELECT REGION_NAME FROM R_REGION_TABLE WHERE A.REGION_CODE = REGION_CODE) AS REGION_NAME
+	    	     , DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS reg_date
+	    	     , A.WRITER AS writer
+	    	     , A.DEL_YN AS del_yn
+	    	  FROM R_REGIONAL_EDU A
+	    	 WHERE 1=1
+		 	 <if test="searchWrd != null and searchWrd != ''"><!-- searchCnd -->
+				<if test="searchCnd != null and searchCnd != ''">
+					<if test="searchCnd == 3">
+						AND A.R_EDU_TITLE LIKE CONCAT ('%', #{searchWrd},'%') OR A.R_EDU_CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') OR A.WRITER LIKE CONCAT ('%', #{searchWrd},'%')
+					</if>
+					<if test="searchCnd == 0">
+						AND A.R_EDU_TITLE LIKE CONCAT ('%', #{searchWrd},'%')
+					</if>
+					<if test="searchCnd == 1">
+						AND A.R_EDU_CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') 
+					</if>
+					<if test="searchCnd == 2">
+						AND A.WRITER LIKE CONCAT ('%', #{searchWrd},'%')
+					</if>
+				</if>
+			</if>
+			<if test="region_code != null and region_code != ''">
+				AND A.REGION_CODE =  #{region_code}
+			</if>
+	 		) t
+	  WHERE t.DEL_YN = 'N'
+	</select>
+	<insert id="regionalEduInsert" parameterType="AdminEducationVO">
+		INSERT INTO R_REGIONAL_EDU
+		(R_EDU_NO, R_EDU_TITLE, R_EDU_START, R_EDU_END, R_EDU_PLACE, R_EDU_TEL, R_EDU_SUMMARY, R_EDU_CONTENTS, REGION_CODE, ATTACHED_FILE_ID, DISPLAY_YN, REG_DATE, DEL_YN, WRITER, UPDATE_DATE, UPDATE_WRITER)
+		SELECT IFNULL(MAX(r_edu_no)+1, 1), #{r_edu_title}, #{r_edu_start}, #{r_edu_end}, #{r_edu_place}, #{r_edu_tel}, #{r_edu_summary}, #{r_edu_contents}, #{region_code}, #{attached_file_id}, #{display_yn}, NOW(), 'N', #{writer}, NOW(), #{writer} FROM R_REGIONAL_EDU 
+	</insert>	
+	<select id="selectRegionalEduArticle" parameterType="AdminEducationVO" resultType="AdminEducationVO">
+		SELECT R_EDU_NO AS r_edu_no
+	         , R_EDU_TITLE AS r_edu_title
+	    	 , DATE_FORMAT(R_EDU_START, '%Y-%m-%d') AS r_edu_start 
+	    	 , DATE_FORMAT(R_EDU_END, '%Y-%m-%d') AS r_edu_end
+	    	 , R_EDU_PLACE AS r_edu_place
+	    	 , R_EDU_TEL AS r_edu_tel
+	    	 , R_EDU_SUMMARY AS r_edu_summary
+	    	 , CONVERT(R_EDU_CONTENTS USING utf8) AS r_edu_contents
+	    	 , ATTACHED_FILE_ID AS attached_file_id
+	    	 , CASE WHEN (SELECT USE_AT FROM R_COMM_FILE WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) = 'Y' THEN 'Y' ELSE 'N' END AS  attached_file_yn
+	    	 , (SELECT COUNT(*) FROM R_COMM_FILE_DETAIL WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) AS attached_file_cnt
+	    	 , REGION_CODE AS region_code
+	    	 , (SELECT REGION_NAME FROM R_REGION_TABLE WHERE A.REGION_CODE = REGION_CODE) AS REGION_NAME
+	    	 , DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS reg_date
+	    	 , A.WRITER AS writer
+	    	 , B.NAME AS name
+	    	 , A.DEL_YN AS del_yn
+	    	 , DISPLAY_YN AS display_yn
+	    	 <![CDATA[
+             , (SELECT R_EDU_NO FROM R_REGIONAL_EDU WHERE R_EDU_NO < #{r_edu_no} AND DEL_YN = 'N' ORDER BY R_EDU_NO DESC LIMIT 1) AS prev_no
+             , (SELECT R_EDU_TITLE FROM R_REGIONAL_EDU WHERE R_EDU_NO < #{r_edu_no} AND DEL_YN = 'N' ORDER BY R_EDU_NO DESC LIMIT 1) AS prev_title
+             , (SELECT R_EDU_NO FROM R_REGIONAL_EDU WHERE R_EDU_NO > #{r_edu_no} AND DEL_YN = 'N' ORDER BY R_EDU_NO ASC LIMIT 1) AS next_no
+             , (SELECT R_EDU_TITLE FROM R_REGIONAL_EDU WHERE R_EDU_NO > #{r_edu_no} AND DEL_YN = 'N' ORDER BY R_EDU_NO ASC LIMIT 1) AS next_title
+             ]]> 
+	      FROM R_REGIONAL_EDU A LEFT JOIN R_ADMIN B ON A.WRITER = B.ID
+	     WHERE 1=1
+	       AND R_EDU_NO = #{r_edu_no}
+	</select>
+	<update id="regionalEduDelete" parameterType="AdminEducationVO">
+		UPDATE R_REGIONAL_EDU
+		   SET DEL_YN = 'Y'
+		 WHERE R_EDU_NO = #{r_edu_no}
+	</update>	
+	<update id="regionalEduUpdate" parameterType="AdminEducationVO">
+		UPDATE R_REGIONAL_EDU
+		   SET R_EDU_TITLE = #{r_edu_title} 
+		     , R_EDU_START = #{r_edu_start} 
+		     , R_EDU_END = #{r_edu_end}
+		     , R_EDU_PLACE = #{r_edu_place}
+		     , R_EDU_TEL = #{r_edu_tel}
+		     , R_EDU_SUMMARY = #{r_edu_summary}
+		     , R_EDU_CONTENTS = #{r_edu_contents}
+		     , REGION_CODE = #{region_code}
+		     <if test="attached_file_id != null and attached_file_id != ''">
+		     , ATTACHED_FILE_ID = #{attached_file_id}
+		     </if>
+		     , DISPLAY_YN = #{display_yn}
+		     , UPDATE_DATE = NOW()
+		     , UPDATE_WRITER = #{writer}
+		 WHERE R_EDU_NO = #{r_edu_no}
+	</update>
+</mapper>

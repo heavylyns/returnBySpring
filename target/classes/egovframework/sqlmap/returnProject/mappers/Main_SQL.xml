@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- <!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd"> -->
+<mapper namespace="returnProject.site.main.service.impl.MainMapper">
+	
+	<select id="selectNewsList" parameterType="BoardVO" resultType="BoardVO">
+		SELECT 
+			BOARD_NO AS boardNo, 
+			TITLE AS nttSj
+		FROM R_BOARD
+		WHERE BOARD_CODE = #{boardCode}
+		AND	  DEL_YN = 'N'
+		ORDER BY BOARD_NO DESC
+		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+	<select id="selectInfoList" resultType="popupVO">
+		SELECT 
+			popup_no,
+		    title,
+		    link,
+		    contents,
+		    target,
+		    a.atch_file_id,
+		    file_sn
+		FROM r_popup a left join r_comm_file_detail b on a.atch_file_id = b.ATCH_FILE_ID
+		WHERE VIEW_TYPE = 'info'
+		AND	  VIEW_FLAG = 'Y'
+		<![CDATA[
+		AND	  START_DATE <= SYSDATE()
+		AND   SYSDATE() <= END_DATE
+		]]>
+		ORDER BY reg_date ASC;    
+	</select>
+	<select id="selectStory" resultType="SiteBoardVO">
+		SELECT 
+			board_no,
+			title, 
+			contents,
+			CONCAT(FILE_STRE_COURS, STRE_FILE_NM, '.', FILE_EXTSN) AS attached_file_url
+		FROM r_board a left join r_comm_file_detail b on a.attached_file_id = b.ATCH_FILE_ID
+		WHERE a.board_no = (SELECT 
+									MAX(board_no) 
+							FROM  	r_board c
+							WHERE 	c.board_code = '04'
+							AND	 	c.del_yn = 'N')
+	</select>
+	<select id="selectPopupList" resultType="popupVO">
+		SELECT 
+			 popup_no
+			,title
+			,input_type
+			,size_width
+			,size_height
+			,view_width
+			,view_height
+			,link
+			,start_date
+			,end_date
+			,A.atch_file_id
+			,B.file_sn
+			,B.orignl_file_nm
+		FROM R_POPUP A LEFT JOIN R_COMM_FILE_DETAIL B ON A.ATCH_FILE_ID = B.ATCH_FILE_ID
+		WHERE VIEW_TYPE = 'popup'
+		AND   VIEW_FLAG = 'Y'
+		<![CDATA[
+		AND	  START_DATE <= SYSDATE()
+		AND   SYSDATE() <= (END_DATE + INTERVAL 1 DAY)
+		]]>
+		ORDER BY
+			REG_DATE ASC
+	</select>
+	<select id="actionLogin" parameterType="SiteMemberVO" resultType="SiteMemberVO">
+		SELECT 
+			 id
+			,password
+			,name
+			,member_type
+			,region_code
+		FROM R_MEMBER
+		WHERE id = #{id}
+		AND	  password = #{enc_password}
+		AND   DEL_YN = 'N'
+	</select>
+	<select id="actionLogin2" parameterType="SiteMemberVO" resultType="SiteMemberVO">
+		SELECT
+			 id
+			,password
+			,name
+		FROM R_ADMIN
+		WHERE id = #{id}
+		AND   password = #{password}
+	</select>
+	<insert id="insertMember" parameterType="SiteMemberVO">
+		INSERT INTO R_MEMBER (id, password, name, member_type, region_code, reg_date, del_yn)
+		VALUES(
+			 #{id}
+			,#{password}
+			,#{name}
+			,#{member_type}
+			,#{region_code}
+			,SYSDATE()
+			,'N'
+		)
+		
+	</insert>
+	<update id="updateMember" parameterType="SiteMemberVO">
+		UPDATE R_MEMBER
+		SET    password = #{password},
+			   update_date = SYSDATE()
+		WHERE id = #{id}
+		AND   NAME = #{name}
+	</update>
+	<update id="deleteMember" parameterType="SiteMemberVO">
+		UPDATE R_MEMBER
+		SET    DEL_YN = 'Y',
+			   update_date = SYSDATE()
+		WHERE id = #{id}
+	</update>
+	
+
+	<select id="selectPopupView" parameterType="PopupVO" resultType="PopupVO" >
+				SELECT 
+					POPUP_NO, TITLE, INPUT_TYPE, OUTPUT_TYPE, SIZE_WIDTH, SIZE_HEIGHT, VIEW_WIDTH, VIEW_HEIGHT,
+					DATE_FORMAT(START_DATE, '%Y-%m-%d') AS START_DATE, DATE_FORMAT(END_DATE, '%Y-%m-%d') AS END_DATE,
+        			VIEW_FLAG, LINK, TARGET, DATE_FORMAT(REG_DATE, '%Y-%m-%d') AS REG_DATE, REG_DATE AS REG_DATE2, ATCH_FILE_ID
+				FROM R_POPUP
+				WHERE VIEW_FLAG = 'Y'
+     			  AND VIEW_TYPE = 'popup'
+     			  AND POPUP_NO = #{popup_no}
+	</select>
+	<select id="existChk_id" parameterType="String" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM R_MEMBER
+		WHERE ID = #{id}
+	</select>
+</mapper>

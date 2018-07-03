@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- <!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd"> -->
+<mapper namespace="returnProject.site.edu.service.impl.EduMapper" >
+	<select id="selectEduList" resultType="AdminEducationVO">
+		SELECT 
+			R_EDU_NO AS education_no,
+		    R_EDU_TITLE AS education_name,
+		    DATE_FORMAT(R_EDU_START, '%Y-%m-%d') AS education_start,
+		    DATE_FORMAT(R_EDU_END + INTERVAL 1 DAY, '%Y-%m-%d') AS education_end
+		FROM
+		    R_REGIONAL_EDU
+		WHERE
+			DEL_YN = 'N'
+			<![CDATA[
+		AND DISPLAY_YN = 'Y' AND DATE_FORMAT(R_EDU_START, '%Y-%m-%d') <= DATE_FORMAT(R_EDU_END + INTERVAL 1 DAY, '%Y-%m-%d')
+		 ]]> 
+	</select>
+	<select id="regionalEduDataByDate" resultType="egovMap" parameterType="AdminEducationVO">
+		SELECT 
+			R_EDU_NO AS education_no,
+		    R_EDU_TITLE AS education_name
+		FROM
+		    R_REGIONAL_EDU
+		WHERE
+			DEL_YN = 'N'
+		AND DISPLAY_YN = 'Y'
+		<![CDATA[
+		AND date_format(R_EDU_START, '%Y-%m-%d') <= #{standard_date}
+        AND date_format(R_EDU_END, '%Y-%m-%d') >= #{standard_date}
+        ]]> 
+	</select>
+	<select id="regionalEduDataByDateInfo" resultType="egovMap" parameterType="AdminEducationVO">
+		SELECT R_EDU_NO AS education_no
+			 , R_EDU_TITLE AS education_name
+             , date_format(R_EDU_START, '%Y-%m-%d') AS education_start
+             , date_format(R_EDU_END, '%Y-%m-%d') AS education_end
+             , R_EDU_TEL AS r_edu_tel
+             , R_EDU_SUMMARY AS r_edu_summary
+		FROM
+		    R_REGIONAL_EDU
+		WHERE
+			DEL_YN = 'N'
+		AND DISPLAY_YN = 'Y'
+		AND R_EDU_NO = #{education_no}
+		
+	</select>
+</mapper>

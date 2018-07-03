@@ -1,0 +1,114 @@
+@charset "utf-8";
+
+@font-face{
+    font-family:"ngRegular";
+    src:url('/admin/css/fonts/NanumGothic-Regular.eot');
+    src:url('/admin/css/fonts/NanumGothic-Regular.eot?#iefix') format('embedded-opentype'),
+    url('/admin/css/fonts/NanumGothic-Regular.woff') format('woff');
+    /*url('/admin/css/fonts/NanumGothic-Regular.ttf') format('truetype');*/
+    src:local("※"), url('/admin/css/fonts/NanumGothic-Regular.woff') format('woff');
+}
+
+@font-face{
+    font-family:"ngBold";
+    src:url('/admin/css/fonts/NanumGothic-Bold.eot');
+    src:url('/admin/css/fonts/NanumGothic-Bold.eot?#iefix') format('embedded-opentype'),
+    url('/admin/css/fonts/NanumGothic-Bold.woff') format('woff');
+    /*url('/admin/css/fonts/NanumGothic-Bold.ttf') format('truetype');*/
+    src:local("※"), url('/admin/css/fonts/NanumGothic-Bold.woff') format('woff');
+}
+
+body {font-family:ngRegular, '나눔고딕', '돋움', Dotum, sans-serif;}
+input {font-family:ngRegular, '나눔고딕', '돋움', Dotum, sans-serif; font-size:17px;}
+select, textarea, button {font-family:ngRegular, '나눔고딕', '돋움', Dotum, sans-serif;}
+
+* {box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box;}
+html {margin:0;padding:0; }
+body {margin:0; padding:0;font-size:17px;line-height:1.5;color:#464646;letter-spacing:-1px;-webkit-text-size-adjust:none;}
+div,h1,h2,h3,h4,h5,h6,ul,ol,li,dl,dt,dd,p,form,fieldset,input,table,tr,th,td,button,textarea,select {margin:0;padding:0;}
+h1, h2, h3, h4, h5, h6{font-size:100%;font-weight:normal}
+img {border:0;vertical-align:top;}
+hr { display: none;}
+ul,ol,dl,dt,dd,li {list-style:none;}
+table, th, td {border-collapse:collapse;border-spacing:0;font-weight: normal;}
+caption {display:block;text-indent:-9999em;overflow:hidden;height:0;font-size:0;line-height:0;}
+fieldset, blockquote, iframe, button {border:none;}
+i, em, u, cite {font-style:normal;}
+strong,em, b {font-weight:normal;}
+a {color:#464646;text-decoration:none;}
+button {background:transparent;cursor:pointer;vertical-align:middle;margin:0;padding:0;font-size:17px;line-height:1.5;color:#464646;letter-spacing:0;-webkit-text-size-adjust:none;}
+button,input[type="submit"], input[type="button"], input[type="reset"] {cursor:pointer;-webkit-appearance:none;}
+section, nav, article, aside, header, footer, main {display:block;}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-inner-spin-button {display:none;}
+input[type="text"],
+input[type="search"],
+input[type="tel"],
+input[type="number"],
+input[type="password"]{-webkit-appearance:none;border-radius:0}
+::-webkit-input-placeholder {color: #aaa;}
+::-moz-placeholder {color: #aaa;}
+:-ms-input-placeholder {color: #aaa;}
+:-moz-placeholder {color: #aaa;}
+::-ms-clear,
+::-ms-reveal {display: none;}
+select, textarea, button {border-radius: 0}
+input[type="text"],input[type="search"] {-webkit-appearance: none;border-radius: 0}
+.skip {width:100%;height:0;top:0;left:0}
+.skip a {display:block;overflow:hidden;position:absolute;top:0;text-indent:-9999px;}
+.skip a:focus, .skip a:active {display:block;position:absolute;top:0;width:100%;z-index:9999;padding:10px 0;font-size:14px;line-height:14px;text-indent:0;text-align:center;color:#fff;background:#444}
+
+
+@media all and (min-width:768px) {
+    body, button {font-size:17px;}
+}
+
+/* IR */
+.screen_out {overflow:hidden;position:absolute;top:-9999px;left:-9999px;width:1px;height:1px;font-size:1px;}
+
+/* float clear */
+.clearfix:after { clear:both; display:block; content:""; height:0; visibility:hidden;  }
+* html .fclear { height:1px; }
+.clearfix { display:block; min-height:1px; }
+
+/* box align */
+.fl{float:left;}
+.fr{float:right;}
+.fc{clear:both;}
+
+/* text align */
+.tl{text-align:left;}
+.tr{text-align:right;}
+.tc{text-align:center;}
+
+/* position align */
+.poss { position: static;}
+.posr { position: relative;}
+.posa { position: absolute;}
+.posf { position: fixed;}
+
+/* dvice show/hide */
+.mobshow { display: block;}
+.tabletshow { display: none;}
+.webshow {display:none;}
+
+@media all and (min-width:768px) {
+    .mobshow {display:none;}
+    .tabletshow { display: block;}
+}
+
+@media all and (min-width:1260px) {
+    .webshow {display:block;}
+}
+
+.defbtn-wrap {text-align:center; padding-top:80px;}
+.defbtn {display:inline-block; vertical-align:middle; font-size:17px; text-align:center; height:55px; line-height:55px; min-width:135px; margin-bottom:5px;}
+.defbtn.pink {background:#5269a3; color:#fff;}
+.defbtn.navy {background:#4c4f5d; color:#fff;}
+.defbtn.white {border:1px solid #5269a3; color:#5269a3;}
+.defbtn.smbtn {font-size:14px; height:40px; line-height:40px;}
+.txt-pink {color:#5269a3;}
+
+@media all and (min-width:768px) {
+
+}

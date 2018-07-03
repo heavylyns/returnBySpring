@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Mber">
+
+    <typeAlias  alias="egovMap"      type = "egovframework.rte.psl.dataaccess.util.EgovMap"/>
+    <typeAlias  alias="userSearchVO" type = "egovframework.com.uss.umt.service.UserDefaultVO"/>
+    <typeAlias  alias="mberVO"       type = "egovframework.com.uss.umt.service.MberManageVO"/>
+
+    <resultMap id="stplatMap" class="egovframework.com.uss.umt.service.StplatVO">
+        <result property="useStplatId"         column="USE_STPLAT_ID"          columnIndex="1"/>
+        <result property="useStplatCn"         column="USE_STPLAT_CN"          columnIndex="2"/>
+        <result property="infoProvdAgeCn"      column="INFO_PROVD_AGRE_CN"     columnIndex="3"/>
+    </resultMap>
+    
+ <select id="mberManageDAO.selectMberList" parameterClass="userSearchVO" resultClass="egovMap">
+SELECT 
+    uniqId, userTy, userId , userNm, emailAdres, areaNo, middleTelno, endTelno, moblphonNo, groupId, sttus, sbscrbDe
+FROM(
+    SELECT 
+        ESNTL_ID               uniqId,
+        'USR01'               userTy,
+        MBER_ID               userId,
+        MBER_NM               userNm,
+        MBER_EMAIL_ADRES      emailAdres,
+        AREA_NO               areaNo,
+        MIDDLE_TELNO          middleTelno,
+        END_TELNO             endTelno,
+        MBTLNUM           moblphonNo,
+        GROUP_ID              groupId,
+        MBER_STTUS            sttus,
+        SBSCRB_DE             sbscrbDe
+    FROM    COMTNGNRLMBER
+    ) A
+        WHERE 1=1
+        <isNotEqual prepend="AND" property="sbscrbSttus" compareValue="0">
+            sttus LIKE  #sbscrbSttus#
+        </isNotEqual>
+        <isEqual prepend="AND" property="searchCondition" compareValue="0">
+            userId LIKE #searchKeyword#
+        </isEqual>
+        <isEqual prepend="AND" property="searchCondition" compareValue="1">
+            userNm LIKE '%' #searchKeyword# '%'
+        </isEqual>
+        ORDER BY sbscrbDe DESC
+        LIMIT #recordCountPerPage# OFFSET #firstIndex#
+    </select>
+    
+    
+        <select id="mberManageDAO.selectMberListTotCnt" parameterClass="userSearchVO" resultClass="int">
+            SELECT COUNT(1) totcnt
+            FROM(
+            SELECT 
+                ESNTL_ID               uniqId,
+                'USR01'               userTy,
+                MBER_ID               userId,
+                MBER_NM               userNm,
+                MBER_EMAIL_ADRES      emailAdres,
+                AREA_NO               areaNo,
+                MIDDLE_TELNO          middleTelno,
+                END_TELNO             endTelno,
+                MBTLNUM           moblphonNo,
+                GROUP_ID              groupId,
+                MBER_STTUS            sttus,
+                SBSCRB_DE             sbscrbDe
+            FROM    COMTNGNRLMBER
+            ) A
+        WHERE 1=1
+            <isNotEqual prepend="AND" property="sbscrbSttus" compareValue="0">
+                sttus LIKE  #sbscrbSttus#
+            </isNotEqual>
+            <isEqual prepend="AND" property="searchCondition" compareValue="0">
+                userId LIKE #searchKeyword#
+            </isEqual>
+            <isEqual prepend="AND" property="searchCondition" compareValue="1">
+                userNm LIKE '%' #searchKeyword# '%'
+            </isEqual>
+    </select>
+    
+    <insert id="mberManageDAO.insertMber_S">
+        <![CDATA[
+            INSERT INTO COMTNGNRLMBER 
+                (   
+                    ESNTL_ID          ,
+                    MBER_ID          ,
+                    MBER_NM          ,
+                    PASSWORD         ,
+                    PASSWORD_HINT    ,
+                    PASSWORD_CNSR    ,
+                    IHIDNUM          ,
+                    SEXDSTN_CODE     ,
+                    ZIP              ,
+                    ADRES            ,
+                    AREA_NO          ,
+                    MBER_STTUS       ,
+                    DETAIL_ADRES     ,
+                    END_TELNO        ,
+                    MBTLNUM      ,
+                    GROUP_ID         ,
+                    MBER_FXNUM       ,
+                    MBER_EMAIL_ADRES ,
+                    MIDDLE_TELNO     ,
+                    SBSCRB_DE        
+                    ,OPEN_YEAR
+                    ,OPEN_MONTH
+                    ,OPEN_DAY
+                    ,CONDITIONS
+                    ,STORE_NAME
+                    ,MBER_STATUS
+                    ,BUSI_TYPE
+                    ,BUSI_TYPE2
+                    ,TEL_NO1
+                    ,TEL_NO2
+                    ,TEL_NO3
+                    ,FAX_NO1
+                    ,FAX_NO2
+                    ,FAX_NO3
+                    ,PHONE_NO1
+                    ,PHONE_NO2
+                    ,PHONE_NO3
+                    ,RE_NAME
+                    ,ATCH_FILE_ID
+                    ,BANK_NAME
+                    ,BANK_NO
+                    ,BANK_HOLDER
+                    ,MBER_FLAG
+                    ,REQ_DATE
+                    ,CI
+	                ,BIRTH_YEAR
+                    ,BIRTH_MONTH
+                    ,BIRTH_DAY
+              )VALUES(
+                    #uniqId#,
+                    #mberId#,
+                    #mberNm#,
+                    #password#,
+                    #passwordHint#,
+                    #passwordCnsr#,
+                    #ihidnum#,
+                    #sexdstnCode#,
+                    #zip#,
+                    #adres#,
+                    #areaNo#,
+                    #mberSttus#,
+                    #detailAdres#,
+                    #endTelno#,
+                    #moblphonNo#,
+                    #groupId#,
+                    #mberFxnum#,
+                    #mberEmailAdres#,
+                    #middleTelno#,
+                    sysdate()
+                    ,#open_year#
+                    ,#open_month#
+                    ,#open_day#
+                    ,#conditions#
+                    ,#store_name#
+                    ,#mber_status#
+                    ,#busi_type#
+                    ,#busi_type2#
+                    ,#tel_no1#
+                    ,#tel_no2#
+                    ,#tel_no3#
+                    ,#fax_no1#
+                    ,#fax_no2#
+                    ,#fax_no3#
+                    ,#phone_no1#
+                    ,#phone_no2#
+                    ,#phone_no3#
+                    ,#re_name#
+                    ,#atchFileId#
+                    ,#bank_name#
+                    ,#bank_no#
+                    ,#bank_holder#
+                    ,'N'
+                    ,SYSDATE()
+                    ,#ci#
+	                ,#birth_year#
+                    ,#birth_month#
+                    ,#birth_day#
+				)              
+        ]]>
+    </insert>
+    
+    <delete id="mberManageDAO.deleteMber_S">
+        <![CDATA[
+            DELETE FROM COMTNGNRLMBER 
+            WHERE ESNTL_ID=#delId#
+        ]]>
+    </delete>
+    
+    <select id="mberManageDAO.selectMber_S" resultClass="mberVO">
+        <![CDATA[
+            SELECT ESNTL_ID          uniqId,
+					'USR01'          userTy,
+					MBER_ID          mberId,
+					MBER_NM          mberNm,
+					PASSWORD         password,
+					PASSWORD_HINT    passwordHint,
+					PASSWORD_CNSR    passwordCnsr,
+					IHIDNUM          ihidnum,
+					SEXDSTN_CODE     sexdstnCode,
+					ZIP              zip,
+					ADRES            adres,
+					AREA_NO          areaNo,
+					MBER_STTUS       mberSttus,
+					DETAIL_ADRES     detailAdres,
+					END_TELNO        endTelno,
+					MBTLNUM      moblphonNo,
+					GROUP_ID         groupId,
+					MBER_FXNUM       mberFxnum,
+					MBER_EMAIL_ADRES mberEmailAdres,
+					MIDDLE_TELNO     middleTelno,
+					SBSCRB_DE        sbscrbDe
+                 , open_year
+                 , open_month
+                 , open_day
+                 , CONDITIONS
+                 , store_name
+                 , birth_year
+                 , birth_month
+                 , birth_day
+                 , mber_status
+                 , COR_NUMBER01
+                 , COR_NUMBER02
+                 , BUSI_TYPE
+                 , BUSI_TYPE2
+                 , TEL_NO1
+                 , TEL_NO2
+                 , TEL_NO3
+                 , FAX_NO1
+                 , FAX_NO2
+                 , FAX_NO3
+                 , PHONE_NO1
+                 , PHONE_NO2
+                 , PHONE_NO3
+                 , re_name
+                 , ATCH_FILE_ID AS atchFileId
+                 , BANK_NAME
+                 , BANK_NO
+                 , BANK_HOLDER
+                 , MBER_FLAG
+                 , REQ_DATE
+                 , APP_DATE
+			FROM COMTNGNRLMBER
+            WHERE ESNTL_ID=#uniqId#
+        ]]>
+    </select>
+    
+    <update id="mberManageDAO.updateMber_S">
+    		<!-- 
+            UPDATE COMTNGNRLMBER 
+            SET MBER_NM          = #mberNm#,
+                PASSWORD	     = #password#,
+                PASSWORD_HINT    = #passwordHint#,
+                PASSWORD_CNSR    = #passwordCnsr#,
+                IHIDNUM          = #ihidnum#,
+                SEXDSTN_CODE     = #sexdstnCode#,
+                ZIP              = #zip#,
+                ADRES            = #adres#,
+                AREA_NO          = #areaNo#,
+                MBER_STTUS       = #mberSttus#,
+                DETAIL_ADRES     = #detailAdres#,
+                END_TELNO        = #endTelno#,
+                MBTLNUM      	 = #moblphonNo#,
+                GROUP_ID         = #groupId#,
+                MBER_FXNUM       = #mberFxnum#,
+                MBER_EMAIL_ADRES = #mberEmailAdres#,
+                MIDDLE_TELNO     = #middleTelno#
+               ,OPEN_YEAR     	 = #open_year#
+               ,OPEN_MONTH     	 = #open_month#
+               ,OPEN_DAY     	 = #open_day#
+               ,BUSI_TYPE     	 = #busi_type#
+               ,BUSI_TYPE2     	 = #busi_type2#
+               ,TEL_NO1     	 = #tel_no1#
+               ,TEL_NO2     	 = #tel_no2#
+               ,TEL_NO3     	 = #tel_no3#
+               ,FAX_NO1     	 = #fax_no1#
+               ,FAX_NO2     	 = #fax_no2#
+               ,FAX_NO3     	 = #fax_no3#
+               ,PHONE_NO1     	 = #phone_no1#
+               ,PHONE_NO2     	 = #phone_no2#
+               ,PHONE_NO3     	 = #phone_no3#
+               ,ATCH_FILE_ID     = #atchFileId#
+               ,BANK_NAME     	 = #bank_name#
+               ,BANK_NO     	 = #bank_no#
+               ,BANK_HOLDER      = #bank_holder#
+               ,RE_NAME			 = #re_name#
+               ,STORE_NAME 		 = #store_name#
+               ,CONDITIONS	 	 = #conditions#
+		<isEqual prepend="," property="mber_status" compareValue="1">
+		      BIRTH_YEAR		= #birth_year#
+		        ,BIRTH_MONTH	= #birth_month#
+		        ,BIRTH_DAY		= #birth_day#
+		</isEqual>
+		<isEqual prepend="," property="mber_status" compareValue="2">
+		         COR_NUMBER01	= #cor_number01#
+		        ,COR_NUMBER02	= #cor_number02#
+		</isEqual>
+            WHERE ESNTL_ID=#uniqId#
+             -->
+        <![CDATA[
+            UPDATE COMTNGNRLMBER 
+            SET
+				UPDATE_FLAG	= 'Y',
+				UPDATE_MEMO	= #update_memo#
+            WHERE MBER_NM = #mberNm#
+        ]]>
+    </update>
+    
+    <select id="mberManageDAO.selectStplat_S" resultMap="stplatMap">
+        <![CDATA[
+            SELECT
+                USE_STPLAT_ID           ,
+                USE_STPLAT_CN           ,
+                INFO_PROVD_AGRE_CN      
+            FROM COMTNSTPLATINFO
+            WHERE USE_STPLAT_ID=#stplatId#
+        ]]>
+    </select>
+    
+    <update id="mberManageDAO.updatePassword_S">
+        <![CDATA[
+            UPDATE COMTNGNRLMBER 
+            SET 
+                   PASSWORD   =  #password#
+            WHERE  ESNTL_ID  = #uniqId#
+        ]]>
+    </update>
+    
+    <select id="mberManageDAO.selectPassword_S" resultClass="mberVO">
+        <![CDATA[
+            SELECT
+                    PASSWORD          password 
+            FROM    COMTNGNRLMBER
+            WHERE   ESNTL_ID=#uniqId#
+        ]]>
+    </select>
+    
+</sqlMap>

@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- <!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd"> -->
+<mapper namespace="returnProject.site.board.service.impl.BoardMapper">
+	
+	<resultMap id="boardList"  type="SiteBoardVO">
+		<result column="board_no" property="board_no" />
+		<result column="board_code" property="board_code"/>
+		<result column="board_name" property=""/>
+		<result column="title" property="title"/>
+		<result column="view_cnt" property="view_cnt"/>
+		<result column="status" property="status"/>
+		<result column="writer" property="writer"/>
+		<result column="reg_date" property="reg_date"/>
+		<result column="contents" property="contents" jdbcType="BLOB"/>
+		
+	</resultMap>
+	
+	<select id="selectBoardList" parameterType="BoardVO" resultType="SiteBoardVO" >
+	<if test="boardCode == 07">
+	SELECT Z.*, FLOOR((Z.ROWNUM2-1)/3) AS group_num FROM (
+	SELECT X.*, @RNUMN := (@RNUMN + 1) AS ROWNUM2 FROM (
+	</if>
+	SELECT t.*, @RNUM := @RNUM + 1 AS ROWNUM FROM
+	(
+	    SELECT A.BOARD_NO as board_no
+             , A.BOARD_CODE as board_code
+             , A.TITLE as title
+             , A.VIEW_CNT as view_cnt
+             , A.STATUS as status
+             , A.WRITER as writer
+             , A.NAME as name
+             , A.REG_DATE as reg_date
+             , A.CONTENTS as contents
+             , A.ATTACHED_FILE_YN as attached_file_yn
+             , CASE WHEN A.attached_file_cnt = 1 THEN (SELECT CONCAT(FILE_STRE_COURS, STRE_FILE_NM, '.', FILE_EXTSN) FROM R_COMM_FILE_DETAIL WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID)  ELSE NULL END AS attached_file_url
+             , A.DEL_YN 
+             , A.REGION_CODE
+             , A.REGION_NAME
+             <!-- 상담/멘토에게 물어봐 게시판은 잠금플래그를 가져온다 -->
+             <if test="boardCode == 02 || boardCode == 05">
+             , A.LOCK_YN as lock_yn
+             </if>
+		 FROM (
+		SELECT A.BOARD_NO AS board_no 
+		     , A.BOARD_CODE AS board_code
+		     , A.TITLE AS title
+		     , A.VIEW_CNT AS view_cnt
+		     <![CDATA[
+		     , CASE WHEN (SELECT COUNT(*) FROM R_REPLY WHERE A.BOARD_NO = BOARD_NO AND DEL_YN = 'N') > 0 THEN 'Y' ELSE 'N' END AS STATUS
+		     , CASE WHEN (SELECT COUNT(*) FROM R_COMM_FILE_DETAIL WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) > 0 THEN 'Y' ELSE 'N' END AS  attached_file_yn
+		     ]]>  
+		     , A.WRITER AS writer
+		     , IFNULL(C.NAME, B.NAME) AS name
+		     , DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS reg_date
+		     , CONVERT(A.CONTENTS USING utf8) AS contents
+		     , (SELECT COUNT(*) FROM R_COMM_FILE_DETAIL WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) AS attached_file_cnt 
+			 , A.ATTACHED_FILE_ID AS attached_file_id
+			 , A.DEL_YN 
+			 , A.REGION_CODE 
+			 , (SELECT REGION_NAME FROM R_REGION_TABLE WHERE A.REGION_CODE = REGION_CODE) AS REGION_NAME
+			 <if test="boardCode == 02 || boardCode == 05">
+			 , A.LOCK_YN
+			 </if>
+		  FROM R_BOARD A LEFT JOIN R_MEMBER B ON A.WRITER = B.ID 
+		  				 LEFT JOIN R_ADMIN C  ON A.WRITER = C.ID
+		 WHERE 1=1
+	 	 <if test="searchWrd != null and searchWrd != ''"><!-- searchCnd -->
+			<if test="searchCnd != null and searchCnd != ''">
+				<if test="searchCnd == 3">
+					AND ( A.TITLE LIKE CONCAT ('%', #{searchWrd},'%') OR A.CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') OR A.WRITER LIKE CONCAT ('%', #{searchWrd},'%') )
+				</if>
+				<if test="searchCnd == 0">
+					AND A.TITLE LIKE CONCAT ('%', #{searchWrd},'%')
+				</if>
+				<if test="searchCnd == 1">
+					AND A.CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') 
+				</if>
+				<if test="searchCnd == 2">
+					AND A.WRITER LIKE CONCAT ('%', #{searchWrd},'%')
+				</if>
+			</if>
+		</if>
+		<if test="regionCode != null and regionCode != ''">
+			AND A.REGION_CODE =  #{regionCode}
+		</if>
+		) A
+		ORDER BY A.BOARD_NO ASC
+		) t, ( SELECT @RNUM := 0 ) R
+		WHERE t.BOARD_CODE = #{boardCode} AND t.DEL_YN = 'N'
+		ORDER BY ROWNUM DESC
+		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+		<if test="boardCode == 07">
+		  ) X
+		  , (SELECT @RNUMN := 0 ) Y
+		  )Z
+		</if>
+	</select>
+	<select id="selectBoardListCnt" parameterType="BoardVO" resultType="java.lang.Integer">
+	SELECT COUNT(*) FROM
+	(
+		SELECT A.BOARD_NO AS board_no 
+		     , A.BOARD_CODE AS board_code
+		     , A.TITLE AS title
+		     , A.VIEW_CNT AS view_cnt
+		     , A.WRITER AS writer
+		     , DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS reg_date
+		     , CONVERT(A.CONTENTS USING utf8) AS contents
+		     , A.DEL_YN
+		  FROM R_BOARD A
+		 WHERE 1=1
+	 	<if test="searchWrd != null and searchWrd != ''"><!-- searchCnd -->
+			<if test="searchCnd != null and searchCnd != ''">
+				<if test="searchCnd == 3">
+					AND ( A.TITLE LIKE CONCAT ('%', #{searchWrd},'%') OR A.CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') OR A.WRITER LIKE CONCAT ('%', #{searchWrd},'%') )
+				</if>
+				<if test="searchCnd == 0">
+					AND A.TITLE LIKE CONCAT ('%', #{searchWrd},'%')
+				</if>
+				<if test="searchCnd == 1">
+					AND A.CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') 
+				</if>
+				<if test="searchCnd == 2">
+					AND A.WRITER LIKE CONCAT ('%', #{searchWrd},'%')
+				</if>
+			</if>
+			
+		</if>
+		<if test="regionCode != null and regionCode != ''">
+			AND A.REGION_CODE =  #{regionCode}
+		</if>
+		ORDER BY BOARD_NO
+		) t
+		WHERE t.BOARD_CODE = #{boardCode} AND t.DEL_YN = 'N'
+	</select>
+	<select id="selectBoardArticle" parameterType="BoardVO" resultType="SiteBoardVO">
+	<!-- <select id="selectBoardArticle" parameterType="BoardVO" resultMap="boardList"> -->
+		SELECT A.BOARD_NO AS board_no 
+		     , A.BOARD_CODE AS board_code
+		     , A.TITLE AS title
+		     , A.VIEW_CNT AS view_cnt
+		     , IFNULL(C.NAME, B.NAME) AS name
+		     , A.WRITER AS writer
+		     , DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS reg_date
+		     , CONVERT(A.CONTENTS USING utf8) AS contents
+		     <!-- , A.CONTENTS AS contents -->
+		     , A.DEL_YN
+		     , A.ATTACHED_FILE_ID AS attached_file_id
+		     <if test="boardCode == 03 or boardCode == 04 or boardCode == 06 or boardCode == 07"> <!-- 썸네일 조회시에 이용 - 자료실은 사용안함 -->
+		     , (SELECT CONCAT(FILE_STRE_COURS, STRE_FILE_NM, '.', FILE_EXTSN) FROM R_COMM_FILE_DETAIL WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) AS attached_file_url
+		     </if>
+		     <![CDATA[
+             , (SELECT BOARD_NO FROM R_BOARD WHERE BOARD_CODE = #{boardCode} AND DEL_YN = 'N' AND BOARD_NO < #{boardNo}  ORDER BY BOARD_NO DESC LIMIT 1) AS prev_no
+             , (SELECT TITLE FROM R_BOARD WHERE BOARD_CODE = #{boardCode} AND DEL_YN = 'N' AND BOARD_NO < #{boardNo}  ORDER BY BOARD_NO DESC LIMIT 1) AS prev_title
+             , (SELECT BOARD_NO FROM R_BOARD WHERE BOARD_CODE = #{boardCode} AND DEL_YN = 'N' AND BOARD_NO > #{boardNo}  ORDER BY BOARD_NO ASC LIMIT 1) AS next_no
+             , (SELECT TITLE FROM R_BOARD WHERE BOARD_CODE = #{boardCode} AND DEL_YN = 'N' AND BOARD_NO > #{boardNo}  ORDER BY BOARD_NO ASC LIMIT 1) AS next_title
+             , CASE WHEN (SELECT COUNT(*) FROM R_REPLY WHERE A.BOARD_NO = BOARD_NO AND DEL_YN = 'N') > 0 THEN 'Y' ELSE 'N' END AS STATUS
+             ]]>  
+             , A.REGION_CODE AS region_code
+             , (SELECT REGION_NAME FROM R_REGION_TABLE WHERE A.REGION_CODE = REGION_CODE) AS region_name
+		 	 <if test="boardCode == 02 or boardCode == 05">
+		 	 , A.LOCK_YN AS lock_yn
+		 	 </if>
+		  FROM R_BOARD A LEFT JOIN R_MEMBER B ON A.WRITER = B.ID
+		  				 LEFT JOIN R_ADMIN C  ON A.WRITER = C.ID
+		 WHERE A.BOARD_CODE = #{boardCode}
+		   AND A.BOARD_NO = #{boardNo}
+		   AND A.DEL_YN = 'N'
+	</select>
+	<update id="boardViewUpdate" parameterType="BoardVO">
+		UPDATE R_BOARD
+		   SET VIEW_CNT = IFNULL(VIEW_CNT, 0) + 1
+		 WHERE BOARD_CODE = #{boardCode} AND BOARD_NO = #{boardNo}
+	</update>
+	<insert id="boardInsert" parameterType="SiteBoardVO">
+		INSERT INTO R_BOARD 
+		   (
+		   	BOARD_NO, 
+			BOARD_CODE, 
+			TITLE, 
+			CONTENTS, 
+			WRITER, 
+			REG_DATE, 
+			DEL_YN, 
+			ATTACHED_FILE_ID, 
+			UPDATE_DATE, 
+			UPDATE_WRITER
+			<if test="board_code == '03' and region_code != null">
+			, REGION_CODE
+			</if>
+			<if test="board_code == '02' or board_code =='05'">
+			, LOCK_YN
+			</if>
+			)
+			SELECT 
+			IFNULL(MAX(BOARD_NO)+1, 1), 
+			#{board_code}, 
+			#{title}, 
+			#{contents}, 
+			#{writer}, 
+			SYSDATE(), 
+			'N', 
+			#{attached_file_id}, 
+			SYSDATE(), 
+			#{writer} 
+			<if test="board_code == '03'and region_code != null">
+			, #{region_code}
+			</if>
+			<if test="board_code == '02' or board_code =='05'">
+			, #{lock_yn}
+			</if> 
+		FROM R_BOARD 
+	</insert>
+	<update id="boardUpdate" parameterType="SiteBoardVO">
+		UPDATE R_BOARD
+		   SET TITLE = #{title},
+		   	   CONTENTS = #{contents},
+		   	   <if test="attached_file_id != null and attached_file_id != ''">
+		   	   ATTACHED_FILE_ID = #{attached_file_id},
+		   	   </if>
+		   	   <if test="(board_code == '03' or board_code == '09') and region_code != null">
+		   	   REGION_CODE = #{region_code},
+		   	   </if>
+		   	   <if test="board_code == '02' or board_code =='05'">
+		   	   LOCK_YN = #{lock_yn},
+		   	   </if>
+		   	   UPDATE_DATE = SYSDATE(),
+		   	   UPDATE_WRITER = #{writer}
+		 WHERE BOARD_CODE = #{board_code} AND BOARD_NO = #{board_no}
+	</update>
+	<update id="boardDelete" parameterType="SiteBoardVO">
+		UPDATE R_BOARD
+		   SET DEL_YN ='Y'
+		     , UPDATE_DATE = SYSDATE()
+		   	 , UPDATE_WRITER = #{writer}
+		 WHERE BOARD_CODE = #{board_code} AND BOARD_NO = #{board_no}
+	</update>
+	<select id="regionCombo" parameterType="BoardVO" resultType="SiteBoardVO" >
+		SELECT REGION_CODE AS region_code
+			 , REGION_NAME AS region_name
+		  FROM R_REGION_TABLE
+	</select>
+	<insert id="replyInsert" parameterType="SiteBoardVO">
+		INSERT INTO R_REPLY
+		(BOARD_NO, REPLY_NO, CONTENTS, WRITER, REG_DATE, DEL_YN, ATTACHED_FILE_ID, UPDATE_DATE, UPDATE_WRITER)
+		SELECT #{board_no}, IFNULL(MAX(REPLY_NO)+1, 1), #{contents}, #{writer}, SYSDATE(), 'N', #{attached_file_id}, SYSDATE(), #{writer} FROM R_REPLY 
+	</insert>
+	<select id="selectReplyArticle" parameterType="BoardVO" resultType="SiteBoardVO">
+		SELECT A.BOARD_NO AS board_no 
+		     , A.REPLY_NO AS reply_no
+		     , A.WRITER AS writer
+		     , IFNULL(C.NAME, B.NAME) AS name
+		     , DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS reg_date
+		     , CONVERT(A.CONTENTS USING utf8) AS contents
+		     , A.DEL_YN
+		     , A.ATTACHED_FILE_ID AS attached_file_id
+		  FROM R_REPLY A LEFT JOIN R_MEMBER B ON A.WRITER = B.ID LEFT JOIN R_ADMIN C ON A.WRITER = C.ID
+		 WHERE A.BOARD_NO = #{boardNo}
+		   AND A.DEL_YN = 'N'
+	</select>
+	<update id="replyUpdate" parameterType="SiteBoardVO">
+		UPDATE R_REPLY
+		   SET CONTENTS = #{contents},
+		   	   <if test="attached_file_id != null and attached_file_id != ''">
+		   	   ATTACHED_FILE_ID = #{attached_file_id},
+		   	   </if>
+		   	   UPDATE_DATE = SYSDATE(),
+		   	   UPDATE_WRITER = #{writer}
+		 WHERE BOARD_NO = #{board_no} AND REPLY_NO = #{reply_no}
+	</update>
+	<update id="replyDelete" parameterType="SiteBoardVO">
+		UPDATE R_REPLY
+		   SET DEL_YN ='Y'
+		     , UPDATE_DATE = SYSDATE()
+		   	 , UPDATE_WRITER = #{writer}
+		 WHERE BOARD_NO = #{board_no} 
+		 <if test="reply_no != null and reply_no != ''">
+		   AND REPLY_NO = #{reply_no}
+		  </if>
+	</update>
+	
+	<select id="selectRegionalEduList" parameterType="EducationVO" resultType="EducationVO" >
+	SELECT Z.* FROM (
+	SELECT t.*, @RNUM := @RNUM + 1 AS ROWNUM 
+	  FROM (
+	    	SELECT R_EDU_NO AS r_edu_no
+	    		 , R_EDU_TITLE AS r_edu_title
+	    		 , DATE_FORMAT(R_EDU_START, '%Y-%m-%d') AS r_edu_start 
+	    		 , DATE_FORMAT(R_EDU_END, '%Y-%m-%d') AS r_edu_end
+	    		 , R_EDU_PLACE AS r_edu_place
+	    		 , R_EDU_TEL AS r_edu_tel
+	    		 , R_EDU_SUMMARY AS r_edu_summary
+	    		 , CONVERT(R_EDU_CONTENTS USING utf8) AS r_edu_contents
+	    		 , ATTACHED_FILE_ID AS attached_file_id
+	    		 , CASE WHEN (SELECT USE_AT FROM R_COMM_FILE WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) = 'Y' THEN 'Y' ELSE 'N' END AS  attached_file_yn
+	    		 , (SELECT COUNT(*) FROM R_COMM_FILE_DETAIL WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) AS attached_file_cnt
+	    		 , A.REGION_CODE AS region_code
+	    		 , (SELECT REGION_NAME FROM R_REGION_TABLE WHERE A.REGION_CODE = REGION_CODE) AS REGION_NAME
+	    	     , DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS reg_date
+	    	     , WRITER AS writer
+	    	     , IFNULL(C.NAME, B.NAME) AS name
+	    	     , A.DEL_YN AS del_yn
+	    	  FROM R_REGIONAL_EDU A LEFT JOIN R_MEMBER B ON A.WRITER = B.ID
+		  							LEFT JOIN R_ADMIN C  ON A.WRITER = C.ID
+	    	 WHERE 1=1
+		 	 <if test="searchWrd != null and searchWrd != ''"><!-- searchCnd -->
+				<if test="searchCnd != null and searchCnd != ''">
+					<if test="searchCnd == 3">
+						AND ( A.R_EDU_TITLE LIKE CONCAT ('%', #{searchWrd},'%') OR A.R_EDU_CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') OR A.WRITER LIKE CONCAT ('%', #{searchWrd},'%') )
+					</if>
+					<if test="searchCnd == 0">
+						AND A.R_EDU_TITLE LIKE CONCAT ('%', #{searchWrd},'%')
+					</if>
+					<if test="searchCnd == 1">
+						AND A.R_EDU_CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') 
+					</if>
+					<if test="searchCnd == 2">
+						AND A.WRITER LIKE CONCAT ('%', #{searchWrd},'%')
+					</if>
+				</if>
+			</if>
+			<if test="region_code != null and region_code != ''">
+				AND A.REGION_CODE =  #{region_code}
+			</if>
+			ORDER BY R_EDU_NO ASC
+	 		) t, ( SELECT @RNUM := 0 ) R
+	  WHERE t.DEL_YN = 'N') Z
+	  ORDER BY ROWNUM DESC
+	  LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+	<select id="selectRegionalEduListCnt" parameterType="EducationVO" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		  FROM (
+		    	SELECT R_EDU_NO AS r_edu_no
+		    		 , R_EDU_TITLE AS r_edu_title
+		    		 , DATE_FORMAT(R_EDU_START, '%Y-%m-%d') AS r_edu_start 
+		    		 , DATE_FORMAT(R_EDU_END, '%Y-%m-%d') AS r_edu_end
+		    		 , R_EDU_PLACE AS r_edu_place
+		    		 , R_EDU_TEL AS r_edu_tel
+		    		 , R_EDU_SUMMARY AS r_edu_summary
+		    		 , CONVERT(R_EDU_CONTENTS USING utf8) AS r_edu_contents
+		    		 , ATTACHED_FILE_ID AS attached_file_id
+		    		 , CASE WHEN (SELECT USE_AT FROM R_COMM_FILE WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) = 'Y' THEN 'Y' ELSE 'N' END AS  attached_file_yn
+		    		 , (SELECT COUNT(*) FROM R_COMM_FILE_DETAIL WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) AS attached_file_cnt
+		    		 , REGION_CODE AS region_code
+		    		 , (SELECT REGION_NAME FROM R_REGION_TABLE WHERE A.REGION_CODE = REGION_CODE) AS REGION_NAME
+		    	     , DATE_FORMAT(REG_DATE, '%Y-%m-%d') AS reg_date
+		    	     , WRITER AS writer
+		    	     , DEL_YN AS del_yn
+		    	  FROM R_REGIONAL_EDU A
+		    	 WHERE 1=1
+			 	 <if test="searchWrd != null and searchWrd != ''"><!-- searchCnd -->
+					<if test="searchCnd != null and searchCnd != ''">
+						<if test="searchCnd == 3">
+							AND (A.R_EDU_TITLE LIKE CONCAT ('%', #{searchWrd},'%') OR A.R_EDU_CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') OR A.WRITER LIKE CONCAT ('%', #{searchWrd},'%'))
+						</if>
+						<if test="searchCnd == 0">
+							AND A.R_EDU_TITLE LIKE CONCAT ('%', #{searchWrd},'%')
+						</if>
+						<if test="searchCnd == 1">
+							AND A.R_EDU_CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') 
+						</if>
+						<if test="searchCnd == 2">
+							AND A.WRITER LIKE CONCAT ('%', #{searchWrd},'%')
+						</if>
+					</if>
+				</if>
+				<if test="region_code != null and region_code != ''">
+					AND A.REGION_CODE =  #{region_code}
+				</if>
+		 		) t
+		  WHERE t.DEL_YN = 'N'
+	</select>
+	
+	<insert id="regionalEduInsert" parameterType="EducationVO">
+		INSERT INTO R_REGIONAL_EDU
+		(R_EDU_NO, R_EDU_TITLE, R_EDU_START, R_EDU_END, R_EDU_PLACE, R_EDU_TEL, R_EDU_SUMMARY, R_EDU_CONTENTS, REGION_CODE, ATTACHED_FILE_ID, DISPLAY_YN, REG_DATE, DEL_YN, WRITER, UPDATE_DATE, UPDATE_WRITER)
+		SELECT IFNULL(MAX(r_edu_no)+1, 1), #{r_edu_title}, #{r_edu_start}, #{r_edu_end}, #{r_edu_place}, #{r_edu_tel}, #{r_edu_summary}, #{r_edu_contents}, #{region_code}, #{attached_file_id}, #{display_yn}, NOW(), 'N', #{writer}, NOW(), #{writer} FROM R_REGIONAL_EDU 
+	</insert>	
+	
+	<select id="selectRegionalEduArticle" parameterType="EducationVO" resultType="EducationVO">
+		SELECT R_EDU_NO AS r_edu_no
+	         , R_EDU_TITLE AS r_edu_title
+	    	 , DATE_FORMAT(R_EDU_START, '%Y-%m-%d') AS r_edu_start 
+	    	 , DATE_FORMAT(R_EDU_END, '%Y-%m-%d') AS r_edu_end
+	    	 , R_EDU_PLACE AS r_edu_place
+	    	 , R_EDU_TEL AS r_edu_tel
+	    	 , R_EDU_SUMMARY AS r_edu_summary
+	    	 , CONVERT(R_EDU_CONTENTS USING utf8) AS r_edu_contents
+	    	 , ATTACHED_FILE_ID AS attached_file_id
+	    	 , CASE WHEN (SELECT USE_AT FROM R_COMM_FILE WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) = 'Y' THEN 'Y' ELSE 'N' END AS  attached_file_yn
+	    	 , (SELECT COUNT(*) FROM R_COMM_FILE_DETAIL WHERE A.ATTACHED_FILE_ID = ATCH_FILE_ID) AS attached_file_cnt
+	    	 , A.REGION_CODE AS region_code
+	    	 , (SELECT REGION_NAME FROM R_REGION_TABLE WHERE A.REGION_CODE = REGION_CODE) AS REGION_NAME
+	    	 , DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS reg_date
+	    	 , WRITER AS writer
+	    	 , IFNULL(C.NAME, B.NAME) AS name
+	    	 , A.DEL_YN AS del_yn
+	    	 , DISPLAY_YN AS display_yn
+	    	 <![CDATA[
+             , (SELECT R_EDU_NO FROM R_REGIONAL_EDU WHERE R_EDU_NO < #{r_edu_no} AND DEL_YN = 'N' ORDER BY R_EDU_NO DESC LIMIT 1) AS prev_no
+             , (SELECT R_EDU_TITLE FROM R_REGIONAL_EDU WHERE R_EDU_NO < #{r_edu_no} AND DEL_YN = 'N' ORDER BY R_EDU_NO DESC LIMIT 1) AS prev_title
+             , (SELECT R_EDU_NO FROM R_REGIONAL_EDU WHERE R_EDU_NO > #{r_edu_no} AND DEL_YN = 'N' ORDER BY R_EDU_NO ASC LIMIT 1) AS next_no
+             , (SELECT R_EDU_TITLE FROM R_REGIONAL_EDU WHERE R_EDU_NO > #{r_edu_no} AND DEL_YN = 'N' ORDER BY R_EDU_NO ASC LIMIT 1) AS next_title
+             ]]> 
+	      FROM R_REGIONAL_EDU A LEFT JOIN R_MEMBER B ON A.WRITER = B.ID
+		  						LEFT JOIN R_ADMIN C  ON A.WRITER = C.ID
+	     WHERE 1=1
+	       AND R_EDU_NO = #{r_edu_no}
+	</select>
+	
+	<update id="regionalEduDelete" parameterType="EducationVO">
+		UPDATE R_REGIONAL_EDU
+		   SET DEL_YN = 'Y'
+		 WHERE R_EDU_NO = #{r_edu_no}
+	</update>	
+	
+	<update id="regionalEduUpdate" parameterType="EducationVO">
+		UPDATE R_REGIONAL_EDU
+		   SET R_EDU_TITLE = #{r_edu_title} 
+		     , R_EDU_START = #{r_edu_start} 
+		     , R_EDU_END = #{r_edu_end}
+		     , R_EDU_PLACE = #{r_edu_place}
+		     , R_EDU_TEL = #{r_edu_tel}
+		     , R_EDU_SUMMARY = #{r_edu_summary}
+		     , R_EDU_CONTENTS = #{r_edu_contents}
+		     , REGION_CODE = #{region_code}
+		     <if test="attached_file_id != null and attached_file_id != ''">
+		     , ATTACHED_FILE_ID = #{attached_file_id}
+		     </if>
+		     , DISPLAY_YN = #{display_yn}
+		     , UPDATE_DATE = NOW()
+		     , UPDATE_WRITER = #{writer}
+		 WHERE R_EDU_NO = #{r_edu_no}
+	</update>
+	
+
+</mapper>

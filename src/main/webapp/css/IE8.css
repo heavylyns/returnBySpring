@@ -1,0 +1,11 @@
+@charset "utf-8";
+
+/*.background-size {
+	-ms-behavior: url('/etc/designs/happybath/js/libs/backgroundsize.min.htc');
+	behavior: url('/etc/designs/happybath/js/libs/backgroundsize.min.htc');
+}*/
+
+
+.seacharea select {padding:9px 10px 13px;}
+.joininpbox select {padding:10px 10px 11px;}
+.basicboard-tbl.write select  {padding: 5px 10px 6px;}

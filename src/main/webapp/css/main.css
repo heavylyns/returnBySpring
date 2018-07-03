@@ -1,0 +1,78 @@
+@charset "utf-8";
+
+.mainbgwrap {background: url("/image/main/mainbg.jpg") no-repeat center top; min-width: 1500px;}
+.mainsub-tit {padding:170px 0 90px;}
+
+.opacityslide ul{ position: relative; }
+.opacityslide ul li{ display:none; position: absolute; left:0; top:0; opacity: 0; z-index:0; }
+.opacityslide ul li.op-active{ z-index:1; }
+.opacityslide ul li img{ max-width: 100%; }
+.opacityslide .op-indicator {z-index: 5; }
+
+.mainconwrap {padding-bottom:89px;}
+.mainvisslide-wrap {position: relative; width: 589px; float: left;}
+.mainvisslide-wrap .opacityslide ul {padding-bottom:603px;}
+.mainvisslide-wrap ul li {width: 589px; height:603px;}
+.mainvisslide-wrap .opacityslide ul li>a {display: block; width:100%; height: 100%;}
+.mainvisslide-wrap .opacityslide ul li img {max-width: 100%;}
+.mainvisslide-wrap .op-control {display: none;}
+.mainvisslide-wrap .op-indicator {display: inline-block; position: absolute; right:30px; top:15px; width: 15px;}
+.mainvisslide-wrap .op-indibox > button {width: 15px; height: 15px; background:url("/image/main/visslide-indi.png") no-repeat left bottom; display: block; margin-top:5px;}
+.mainvisslide-wrap .op-indibox > button:first-child {margin-bottom:0;}
+.mainvisslide-wrap .op-indibox > button.active {background-position: left top;}
+.mainvisslide-wrap .op-play, .mainvisslide-wrap .op-stop {width: 15px; height: 15px; display: inline-block;}
+/*.mainvisslide-wrap .op-play {background:url("/image/main/main-vis-playbtn.png") no-repeat left top;}
+.mainvisslide-wrap .op-stop {background:url("/image/main/main-vis-stopbtn.png") no-repeat left top;}*/
+
+.borderset {border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; }
+.mainright-wrap {float: left;}
+.main-areatit {font-size: 19px; font-weight: 700; color: #fff; padding: 15px 15px 15px 20px;}
+.newswrap {padding-left:15px;  float: left;}
+.newswrap > div {position: relative;  width: 285px;}
+.newswrap .main-areatit {background: #fdb728; border:1px solid #fdb728; border-radius:8px 8px 0 0; -webkit-border-radius: 8px 8px 0 0; -moz-border-radius:  8px 8px 0 0; }
+.newswrap ul {padding:15px 20px 21px; background: #fff;  border:1px solid #fff; border-radius: 0 0 8px 8px; -webkit-border-radius:0 0 8px 8px; -moz-border-radius: 0 0 8px 8px; min-height: 286px;}
+.newswrap ul li {padding: 7px 0 0 10px; background: url("/image/main/mainnews-bullet.png") no-repeat left 18px;}
+.newswrap ul a {font-size: 13px; color: #4d4d4d; width: 95%; display: inline-block; min-height: 15px; max-height: 15px; line-height: 15px;}
+.newswrap ul a strong {color:#d6410d;}
+.newswrap .morebtn {width:18px; height: 19px; background:url("/image/main/mainnews-more.png") no-repeat left top; position: absolute; right: 20px; top:19px;}
+
+.storywrap {float: left; padding-left: 15px; }
+.storywrap >div {width: 285px; position: relative;}
+.storywrap .imgarea img {max-width: 100%; max-height: 207px; width: 100%;}
+.storywrap .storytxt {padding: 20px; background: #fff; border:1px solid #fff; border-radius: 0 0 8px 8px; -webkit-border-radius:0 0 8px 8px; -moz-border-radius: 0 0 8px 8px; min-height: 139px;}
+.storywrap .storytxt .title {color: #4d4d4d; font-size: 19px; font-weight: 700; display:inline-block; min-height: 49px; max-height: 49px;}
+.storywrap .storytxt .title span {display: block; color: #00a886; font-size: 14px; font-weight: 700;}
+.storywrap .storytxt .desc{font-size: 13px; color: #4d4d4d; padding-top: 10px; min-height: 48px; max-height: 48px;}
+.storywrap .morebtn {width:18px; height: 19px; background:url("/image/main/mainstory-more.png") no-repeat left top; position: absolute; right: 20px; top:19px;}
+
+.infowrap {float: left; padding-left:15px;  font-size: 14px;}
+.infowrap >div {background: url("/image/main/maininfo-bg.png") no-repeat left top; padding: 20px 20px 52px; width: 285px; position: relative;}
+.infowrap .main-areatit {padding: 0 0 20px 0;}
+.infowrap .infoarea {padding-top:30px;}
+.infowrap .infoarea strong {display: block; padding-top:20px; background:url("/image/main/maininfo-bullet.png") no-repeat left top; font-size: 14px; color:#fff000;}
+.infowrap .infoarea span {display: block; color:#fff;}
+.infowrap .morebtn { color: #4368a5;  position: absolute; right:10px; bottom:10px;}
+
+.quickwrap {padding:18px 0 0 15px; width: 100%;}
+.quickwrap .main-areatit {background:#9c9c9c; border:1px solid #9c9c9c; border-radius:8px 8px 0 0; -webkit-border-radius: 8px 8px 0 0; -moz-border-radius:  8px 8px 0 0;}
+.quickslidewrap {background:#fff; padding:26px 30px 26px; font-size: 13px; color:#4d4d4d; border:1px solid #fff; border-radius: 0 0 8px 8px; -webkit-border-radius:0 0 8px 8px; -moz-border-radius: 0 0 8px 8px; }
+.quickwrap .slide li {text-align: center; width: 20%; display: inline-block;}
+.quickwrap .slide li a{padding:100px 5px 0 5px; display: inline-block;}
+.quickwrap .slide li.ico1 a {background:url("/image/main/mainquick-ico1.png") no-repeat center top;}
+.quickwrap .slide li.ico2 a {background:url("/image/main/mainquick-ico2.png") no-repeat center top;}
+.quickwrap .slide li.ico3 a {background:url("/image/main/mainquick-ico3.png") no-repeat center top;}
+.quickwrap .slide li.ico4 a {background:url("/image/main/mainquick-ico4.png") no-repeat center top;}
+.quickwrap .slide li.ico5 a {background:url("/image/main/mainquick-ico5.png") no-repeat center top;}
+.quickwrap .slidebox >button {position: absolute; z-index: 5; width:14px; height:28px; top:50%; margin-top:-20px;}
+.quickwrap .slidebox >button.bas-prev {background:url("/image/main/mainquick-indi.png") left top; left:-15px;}
+.quickwrap .slidebox >button.bas-next {background:url("/image/main/mainquick-indi.png") right top; right:-15px;}
+
+.slidebox {position: relative; width: 100%;}
+.basicslide {overflow: hidden;  z-index:0;width: 100%;}
+.basicslide-container {overflow: hidden;width: 100%;;}
+.basicslide ul{position: relative;display: table;margin-left:-1px;width: 100%; height: 100%;}
+.basicslide ul li{position: relative;display: inline-block; float: left;}
+.basicslide ul li:first-child{margin-left:0;}
+.basicslide ul li a{display: block; text-align: center;}
+.basicslide ul li.bs-active{ z-index:1; }
+.basicslide ul li img{ max-width: 100%; }

@@ -1,0 +1,21 @@
+@charset "utf-8";
+
+.jqListbox-adapt {position:relative;display:block;height:27px}
+.jqListbox-adapt select {width:100%;height:100%;margin:0;padding:0;border:none;}
+.jqListBox {position:relative;top:0;left:0;display:inline-block;*display:inline;*zoom:1;width:100%;vertical-align:top;}
+.jqListBox * {margin:0;padding:0;vertical-align:middle;text-decoration:none;}
+.jqListBox-combo {display:block;height:55px;white-space:nowrap;line-height:55px;color:#292a37;cursor:pointer;*zoom:1;background:#eaeaea;}
+.jqListBox-combo:after {content:"";display:block;clear:both}
+.jqListBox-combo-txt {float:left;overflow:hidden;text-overflow:ellipsis;text-indent:10px; padding-right: 20px;}
+.jqListBox-combo-arrow {float:right;width:20px;height:100%;background:url("jqlistbox-arrow.png") no-repeat 0 50%;}
+.jqListBox-combo-arrow.on {background-position:-29px 50%;}
+.jqListBox-list {overflow-x:hidden;overflow-y:auto;position:absolute;top:auto;left:0;background:#fff;border:1px solid #ccc;list-style:none;z-index:1;}
+.jdate .jqListBox-list {overflow-y:scroll; height:150px;}
+.jqListBox-option{display:block;overflow:hidden;height:30px; line-height:1.5;padding:3px 0;text-indent:10px;color:#606060;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;}
+.jqListBox-option:focus,
+.jqListBox-option:hover,
+.jqListBox-option.selected {background-color:#f5f6f8;color:#2c41a2;}
+
+@media (-o-min-device-pixel-ratio: 5/4), (-webkit-min-device-pixel-ratio: 1.25), (min-resolution: 120dpi) {
+	.jqListBox-combo-arrow {background-image:url("jqlistbox-arrow@2x.png");background-size:56px 7px;}
+}

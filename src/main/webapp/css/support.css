@@ -1,0 +1,55 @@
+@charset "utf-8";
+
+.support .subgnbwrap  {background:url("/image/support/support-subbg.gif") no-repeat center top;}
+
+/* basic green tab css*/
+.greentab-wrap {margin:50px 0 60px; width:100%;}
+.greentab-wrap .greentab {border:1px solid #cfcfd5; border-bottom:3px solid #555; font-size: 14px; color:#666;}
+.greentab-wrap .greentab:after {display: block; clear: both; content: "";}
+.greentab-wrap .greentab li {float: left; text-align: center; border-left:1px solid #cfcfd5; height: 60px; line-height: 60px; background: #fff;}
+.greentab-wrap .greentab li:first-child {border-left:none;}
+.greentab-wrap .greentab li.active { font-weight: 700; background: #05ab8e;}
+.greentab-wrap .greentab li.active a {color: #fff;}
+.greentab-wrap .greentab  a {display: block;}
+/* //basic green tab css*/
+
+
+.gwsuppotwrap .greentab li {width:16.6666%;}
+.gwsuppotwrap .bgarea {display: inline-block; position: absolute; right:35px; bottom: 0;}
+.gwconwrap:after {display: block; clear: both; content: "";}
+.gwconwrap {position: relative; padding-bottom: 95px;}
+.gwconwrap .imgarea {float:left; position: relative;  width: 750px;}
+.gwconwrap .imgarea img {max-width: 100%;}
+.gwconwrap .imgarea .imgtxt {position: absolute; left:60px; top:45px; width: 205px; height: 126px; font-size: 24px; font-weight: 700; color: #0a0a0a; border:5px solid #ffd600; text-align: center; display: table;}
+.gwconwrap .imgarea .imgtxt p {display: table-cell; vertical-align: middle; text-align: center;}
+.gwconwrap .imgarea .imgtxt span {text-align: left; display: inline-block;}
+.gwinfotxt-wrap {float:left; height:448px; width: 740px; background:#ffd600; padding:48px 58px 10px; font-size: 14px; color:#444;}
+.gwinfotxt-wrap .bullettxt {padding-left:10px; background:url("/image/support/gwinfolist-bg.png") no-repeat left 13px; padding-top:5px;}
+.gwinfotxt-wrap .bullettxt strong {color: #ed1c24;}
+.gwinfotxt-wrap > ul {padding:5px 0 20px 20px;}
+
+
+.housewrap .greentab li {width:50%;}
+.housewrap .housecon-wrap {border:1px solid #ddd;}
+.housewrap .housecon {border-bottom: 1px solid #ddd;}
+.housecon:after {display: block; clear: both; content: "";}
+.housecon .imgarea {width: 50%; float: left;}
+.housecon .imgarea img {max-width: 100%;}
+.housecon .houseinfo-wrap {width: 50%; float: left; background: url("/image/support/house-infobg.gif") repeat left top; height: 468px; padding:60px 70px 20px; font-size: 16px; color:#444; border-left:1px solid #ddd;}
+.houseinfo-wrap .housedesc {font-size: 25px; color: #000; font-weight: 700; padding-bottom: 35px; border-bottom:1px dotted #999;}
+.houseinfo-wrap .housedesc span {display: block; font-size: 16px; color:#5d5d5d; font-weight: normal;}
+.houseinfo-wrap .housedesc span:first-child {margin-top:25px;}
+.houseinfo-wrap .houseinfo {margin-top:35px;}
+.houseinfo .infotxt {margin-top:3px;}
+.houseinfo .infotxt:first-child {margin-top:0;}
+.houseinfo .infotxt span {color: #fff; font-weight: 700; display: inline-block; width: 90px; text-align: center; height: 38px; line-height: 38px; background: #626262; margin-right:10px;}
+.calendar-wrap {padding:60px; text-align: center;}
+
+.fcentercon-wrap{border:1px solid #acacac;}
+.fcentercon-wrap:after {display: block; clear: both; content: "";}
+.fcentercon-wrap .fcenterinfo {width: 908px; float: left; padding:25px 60px; font-size: 16px; color:#444;}
+.fcenterinfo .centertxt {margin-top:20px;}
+.fcenterinfo .centertxt strong {display: block; font-weight: 700; color:#ed1c24;}
+.fcenterinfo > ul{margin:15px 0 10px;}
+.fcentercon-wrap .imgarea {width: 580px; float: left;}
+.fcentercon-wrap .imgarea img {max-width: 100%;}

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="returnProject.admin.service.impl.AdminMemberMapper">
+
+	
+	<select id="selectAdminMemberList" parameterType="AdminMemberVO" resultType="AdminMemberVO" >
+			SELECT @RNUM := @RNUM + 1 AS ROWNUM, t.* FROM
+			(
+				SELECT ID
+				     , PASSWORD
+				     , NAME
+				     , MEMBER_TYPE
+				     , REGION_CODE
+				     , (SELECT REGION_NAME FROM R_REGION_TABLE WHERE REGION_CODE = A.REGION_CODE) AS REGION_NAME
+				     , REG_DATE
+				     , UPDATE_DATE
+				  FROM R_MEMBER A
+				 WHERE A.DEL_YN = 'N'
+				 <if test="searchWrd != null and searchWrd != ''"><!-- searchCnd -->
+					<if test="searchCnd != null and searchCnd != ''">
+						<if test="searchCnd == 'all'">
+							AND A.ID LIKE CONCAT ('%', #{searchWrd},'%') OR A.NAME LIKE CONCAT ('%', #{searchWrd},'%') 
+						</if>
+						<if test="searchCnd == '01'">
+							AND A.ID LIKE CONCAT ('%', #{searchWrd},'%')
+						</if>
+						<if test="searchCnd == '02'">
+							AND A.NAME LIKE CONCAT ('%', #{searchWrd},'%') 
+						</if>
+					</if>
+				</if>
+				 ORDER BY REG_DATE
+			) t, ( SELECT @RNUM := 0 ) R 
+			ORDER BY ROWNUM DESC
+			LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+	<select id="selectAdminMemberListCnt" parameterType="AdminMemberVO" resultType="java.lang.Integer" >
+			SELECT COUNT(*)
+			  FROM R_MEMBER A
+			 WHERE DEL_YN = 'N'
+			 <if test="searchWrd != null and searchWrd != ''"><!-- searchCnd -->
+					<if test="searchCnd != null and searchCnd != ''">
+						<if test="searchCnd == 'all'">
+							AND A.ID LIKE CONCAT ('%', #{searchWrd},'%') OR A.NAME LIKE CONCAT ('%', #{searchWrd},'%') 
+						</if>
+						<if test="searchCnd == '01'">
+							AND A.ID LIKE CONCAT ('%', #{searchWrd},'%')
+						</if>
+						<if test="searchCnd == '02'">
+							AND A.NAME LIKE CONCAT ('%', #{searchWrd},'%') 
+						</if>
+					</if>
+				</if>
+	</select>
+	<select id="selectAdminMemberListCntByMemberType" parameterType="String" resultType="java.lang.Integer" >
+			SELECT COUNT(*)
+			  FROM R_MEMBER 
+			 WHERE DEL_YN = 'N'
+			  AND MEMBER_TYPE = #{member_type}
+	</select>
+	<select id="selectAdminMember" resultType="AdminMemberVO" parameterType="String">
+            SELECT ID
+				 , PASSWORD
+				 , NAME
+				 , MEMBER_TYPE
+				 , REGION_CODE
+				 , REG_DATE
+				 , UPDATE_DATE
+			  FROM R_MEMBER
+			 WHERE ID = #{id} AND DEL_YN = 'N'
+	</select>
+	<insert id="memberInsert" parameterType="AdminMemberVO">
+		INSERT INTO R_MEMBER
+		(ID, PASSWORD, NAME, MEMBER_TYPE, REGION_CODE, REG_DATE, UPDATE_DATE, DEL_YN)
+		VALUES
+		(#{id}, #{password}, #{name}, #{member_type}, #{region_code}, NOW(), NOW(), 'N')
+	</insert>	
+	<select id="idCheck" parameterType="String" resultType="java.lang.Integer" >
+			SELECT COUNT(*)
+			  FROM R_MEMBER
+			 WHERE ID = #{id} AND DEL_YN != 'Y'
+	</select>
+	<update id="memberUpdate" parameterType="AdminMemberVO">
+			UPDATE R_MEMBER
+			SET	PASSWORD = #{password} 
+			  , NAME = #{name}
+			  , MEMBER_TYPE = #{member_type} 
+			  , REGION_CODE = #{region_code}
+			  , UPDATE_DATE = NOW()
+			WHERE ID = #{id}
+	</update>
+	<delete id="memberDelete" parameterType="String">
+			UPDATE R_MEMBER 
+			   SET DEL_YN = 'Y'
+			 WHERE ID = #{id}
+	</delete>
+	<update id="webzine_file_delete" parameterType="PopupVO">
+			UPDATE R_POPUP
+			SET	
+				ATCH_FILE_ID 	= ''
+			WHERE
+				POPUP_NO = #{popup_no}
+	</update>
+	<select id="selectRegionStatistics" resultType="AdminMemberVO" parameterType="AdminMemberVO">
+		SELECT REGION_CODE AS REGION_CODE
+			 , REGION_NAME AS REGION_NAME
+		     , (SELECT COUNT(*) FROM R_MEMBER WHERE A.REGION_CODE = REGION_CODE AND DEL_YN = 'N') AS region_cnt
+		  FROM R_REGION_TABLE A
+		  ORDER BY region_cnt DESC
+	</select>
+	
+	
+	
+	
+</mapper>

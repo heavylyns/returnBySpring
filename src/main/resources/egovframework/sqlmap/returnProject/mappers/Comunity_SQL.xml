@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- <!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd"> -->
+<mapper namespace="returnProject.site.comunity.service.impl.ComunityMapper">
+	<select id="selectWebzineList" resultType="popupVO" >
+		SELECT 
+			popup_no,
+		    title,
+		    link,
+		    contents,
+		    target,
+		    A.atch_file_id,
+		    file_sn
+		FROM r_popup A LEFT JOIN r_comm_file_detail B ON A.atch_file_id = B.ATCH_FILE_ID
+		WHERE view_type = 'webzine'
+		ORDER BY reg_date DESC    
+	</select>
+</mapper>

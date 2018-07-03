@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="returnProject.admin.service.impl.HomepAdminMapper">
+
+		
+	<select id="selectAdminList" parameterType="BoardVO" resultType="AdminVO" >
+			SELECT @RNUM := @RNUM + 1 AS ROWNUM, t.* FROM
+			(
+				SELECT 
+					*
+				FROM R_ADMIN
+				WHERE 1=1
+				<if test="searchCnd != null and searchCnd != ''">
+					<choose>
+						<when test="searchCnd eq 'id'">
+							AND ID LIKE CONCAT ('%', #{searchWrd},'%')
+						</when>
+						<when test="searchCnd eq 'name'">
+							AND NAME LIKE CONCAT ('%', #{searchWrd},'%')
+						</when>
+						<when test="searchCnd eq 'organ_name'">
+							AND ORGAN_NAME LIKE CONCAT ('%', #{searchWrd},'%')
+						</when>
+						<otherwise>
+							AND 1=1
+						</otherwise>
+					</choose>
+				</if>
+				ORDER BY REG_DATE ASC
+			) t, ( SELECT @RNUM := 0 ) R 
+			ORDER BY ROWNUM DESC
+			LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+		
+	<select id="selectAdminListCnt" parameterType="BoardVO" resultType="java.lang.Integer" >
+			SELECT 
+				COUNT(ID)
+			FROM R_ADMIN
+			WHERE 1=1
+			<if test="searchCnd != null and searchCnd != ''">
+				<choose>
+					<when test="searchCnd eq 'id'">
+						AND ID LIKE CONCAT ('%', #{searchWrd},'%')
+					</when>
+					<when test="searchCnd eq 'name'">
+						AND NAME LIKE CONCAT ('%', #{searchWrd},'%')
+					</when>
+					<when test="searchCnd eq 'organ_name'">
+						AND ORGAN_NAME LIKE CONCAT ('%', #{searchWrd},'%')
+					</when>
+					<otherwise>
+						AND 1=1
+					</otherwise>
+				</choose>
+			</if>
+	</select>
+	
+	<select id="selectAdminMember" resultType="AdminVO" parameterType="String">
+            SELECT 
+            	ID, PASSWORD, NAME, ORGAN_NAME, DEPART_NAME, PHONE_NO1, PHONE_NO2, PHONE_NO3, ROLEID
+			FROM R_ADMIN
+            WHERE ID = #{id}
+	</select>
+	
+	<insert id="admin_join" parameterType="AdminVO">
+			INSERT INTO R_ADMIN
+			(
+				ID, PASSWORD, NAME, ORGAN_NAME, DEPART_NAME, PHONE_NO1, PHONE_NO2, PHONE_NO3, ROLEID, REG_DATE
+			)
+			VALUES
+			(
+				#{id}, #{password}, #{name}, #{organ_name}, #{depart_name}, #{phone_no1}, #{phone_no2}, #{phone_no3}, #{roleId}, SYSDATE()
+			)
+	</insert>
+	
+	<update id="admin_update" parameterType="AdminVO">
+			UPDATE R_ADMIN
+			SET	
+				PASSWORD 		= #{password},
+				NAME 			= #{name},
+				ORGAN_NAME 		= #{organ_name},
+				DEPART_NAME 	= #{depart_name},
+				PHONE_NO1 		= #{phone_no1},
+				PHONE_NO2 		= #{phone_no2},
+				PHONE_NO3 		= #{phone_no3},
+				ROLEID 			= #{roleId}
+			WHERE
+				ID = #{id}
+	</update>
+	
+	<delete id="admin_delete" parameterType="AdminVO">
+			DELETE FROM R_ADMIN
+			WHERE ID = #{id}
+	</delete>
+	
+	<select id="getAdminRole" resultType="AdminRoleVO" parameterType="String">
+            SELECT 
+            	ID, MENU_ID
+			FROM R_ADMIN_ROLE
+            WHERE ID = #{id}
+	</select>
+	
+	<delete id="deleteAdminRole">
+			DELETE FROM R_ADMIN_ROLE
+			WHERE ID = #{id}
+	</delete>
+	
+	<insert id="addAdminRole" parameterType="AdminRoleVO">
+			INSERT INTO
+				R_ADMIN_ROLE (ID, MENU_ID)
+			VALUES
+				(#{id}, #{menu_id})
+	</insert>
+	
+	
+
+	
+	<update id="organ_update" parameterType="PopupVO">
+			UPDATE R_POPUP
+			SET	
+				TITLE 			= #{title},
+				LINK 			= #{link},
+				CONTENTS 		= #{contents},
+				TARGET 			= #{target},
+				VIEW_FLAG 		= #{view_flag}
+				<if test="atch_file_id != null and atch_file_id != ''">
+					,ATCH_FILE_ID 	= #{atch_file_id}
+				</if>
+			WHERE
+				POPUP_NO = #{popup_no}
+	</update>
+	
+	<delete id="organ_delete" parameterType="PopupVO">
+			DELETE FROM R_POPUP
+			WHERE POPUP_NO = #{popup_no}
+	</delete>
+	
+	<update id="organ_file_delete" parameterType="PopupVO">
+			UPDATE R_POPUP
+			SET	
+				ATCH_FILE_ID 	= ''
+			WHERE
+				POPUP_NO = #{popup_no}
+	</update>
+		
+	<select id="selectInfoList" parameterType="BoardVO" resultType="PopupVO" >
+			SELECT @RNUM := @RNUM + 1 AS ROWNUM, t.* FROM
+			(
+				SELECT 
+					POPUP_NO, TITLE, DATE_FORMAT(START_DATE, '%Y-%m-%d') AS START_DATE, DATE_FORMAT(END_DATE, '%Y-%m-%d') AS END_DATE,
+        			VIEW_FLAG, LINK, TARGET, DATE_FORMAT(REG_DATE, '%Y-%m-%d') AS REG_DATE, REG_DATE AS REG_DATE2, ATCH_FILE_ID
+				FROM R_POPUP
+				WHERE VIEW_TYPE = 'info'
+				<if test="searchWrd != null and searchWrd != ''"><!-- searchCnd -->
+					<if test="searchCnd != null and searchCnd != ''">
+						<!-- <if test="searchCnd == 3">
+							AND A.TITLE LIKE CONCAT ('%', #{searchWrd},'%') OR A.CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') OR A.WRITER LIKE CONCAT ('%', #{searchWrd},'%')
+						</if>
+						<if test="searchCnd == 0">
+							AND A.TITLE LIKE CONCAT ('%', #{searchWrd},'%')
+						</if>
+						<if test="searchCnd == 1">
+							AND A.CONTENTS LIKE CONCAT ('%', #{searchWrd},'%') 
+						</if>
+						<if test="searchCnd == 2">
+							AND A.WRITER LIKE CONCAT ('%', #{searchWrd},'%')
+						</if> -->
+						<if test="searchCnd == 3">
+							AND TITLE LIKE CONCAT ('%', #{searchWrd},'%') 
+						</if>
+						<if test="searchCnd == 0">
+							AND TITLE LIKE CONCAT ('%', #{searchWrd},'%')
+						</if>
+						
+					</if>
+				</if>
+				ORDER BY REG_DATE2 ASC
+			) t, ( SELECT @RNUM := 0 ) R 
+			ORDER BY ROWNUM DESC
+			LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+		
+	<select id="selectInfoListCnt" parameterType="BoardVO" resultType="java.lang.Integer" >
+			SELECT 
+				COUNT(POPUP_NO)
+			FROM R_POPUP
+			WHERE VIEW_TYPE = 'info'
+	</select>
+	
+	<select id="selectInfoView" resultType="PopupVO" parameterType="String">
+            SELECT 
+				POPUP_NO, TITLE, LINK, DATE_FORMAT(START_DATE, '%Y-%m-%d') AS START_DATE, DATE_FORMAT(END_DATE, '%Y-%m-%d') AS END_DATE, 
+				CONTENTS, TARGET, VIEW_FLAG, ATCH_FILE_ID
+			FROM R_POPUP
+			WHERE POPUP_NO = #{popup_no}
+	</select>
+	
+	<insert id="info_join" parameterType="PopupVO">
+			INSERT INTO R_POPUP
+			(
+				POPUP_NO, TITLE, LINK, START_DATE, END_DATE, CONTENTS, TARGET, VIEW_FLAG, VIEW_TYPE, ATCH_FILE_ID, REG_DATE
+			)
+			SELECT IFNULL(MAX(POPUP_NO)+1,1), #{title}, #{link}, #{start_date}, #{end_date}, #{contents}, #{target}, #{view_flag}, 'info', #{atch_file_id}, SYSDATE() FROM R_POPUP
+	</insert>
+	
+	<update id="info_update" parameterType="PopupVO">
+			UPDATE R_POPUP
+			SET	
+				TITLE 			= #{title},
+				LINK 			= #{link},
+				START_DATE 		= #{start_date},
+				END_DATE 		= #{end_date},
+				CONTENTS 		= #{contents},
+				TARGET 			= #{target},
+				VIEW_FLAG 		= #{view_flag}
+				<if test="atch_file_id != null and atch_file_id != ''">
+					,ATCH_FILE_ID 	= #{atch_file_id}
+				</if>
+			WHERE
+				POPUP_NO = #{popup_no}
+	</update>
+		
+	<select id="selectPopupList" parameterType="BoardVO" resultType="PopupVO" >
+			SELECT @RNUM := @RNUM + 1 AS ROWNUM, t.* FROM
+			(
+				SELECT 
+					POPUP_NO, TITLE, DATE_FORMAT(START_DATE, '%Y-%m-%d') AS START_DATE, DATE_FORMAT(END_DATE, '%Y-%m-%d') AS END_DATE,
+        			VIEW_FLAG, LINK, TARGET, DATE_FORMAT(REG_DATE, '%Y-%m-%d') AS REG_DATE, REG_DATE AS REG_DATE2, ATCH_FILE_ID
+				FROM R_POPUP
+				WHERE VIEW_TYPE = 'popup'
+				<if test="searchWrd != null and searchWrd != ''"><!-- searchCnd -->
+					<if test="searchCnd != null and searchCnd != ''">
+						
+						<if test="searchCnd == 3">
+							AND TITLE LIKE CONCAT ('%', #{searchWrd},'%') 
+						</if>
+						<if test="searchCnd == 0">
+							AND TITLE LIKE CONCAT ('%', #{searchWrd},'%')
+						</if>
+						
+					</if>
+				</if>
+				ORDER BY REG_DATE2 ASC
+			) t, ( SELECT @RNUM := 0 ) R 
+			ORDER BY ROWNUM DESC
+			LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+		
+	<select id="selectPopupListCnt" parameterType="BoardVO" resultType="java.lang.Integer" >
+			SELECT 
+				COUNT(POPUP_NO)
+			FROM R_POPUP
+			WHERE VIEW_TYPE = 'popup'
+	</select>
+	
+	<select id="selectPopupView" resultType="PopupVO" parameterType="String">
+            SELECT 
+            	POPUP_NO, TITLE, LINK, DATE_FORMAT(START_DATE, '%Y-%m-%d') AS START_DATE, DATE_FORMAT(END_DATE, '%Y-%m-%d') AS END_DATE,
+            	INPUT_TYPE, OUTPUT_TYPE, SIZE_WIDTH, SIZE_HEIGHT, VIEW_WIDTH, VIEW_HEIGHT, VIEW_FLAG, ATCH_FILE_ID, CONTENTS
+			FROM R_POPUP
+            WHERE POPUP_NO = #{popup_no}
+	</select>
+	
+	<insert id="popup_join" parameterType="PopupVO">
+			INSERT INTO R_POPUP
+			(
+				POPUP_NO, TITLE, INPUT_TYPE, OUTPUT_TYPE, SIZE_WIDTH, SIZE_HEIGHT, VIEW_WIDTH, VIEW_HEIGHT,
+				LINK, START_DATE, END_DATE, VIEW_FLAG, VIEW_TYPE, ATCH_FILE_ID, REG_DATE, CONTENTS
+			)
+			SELECT IFNULL(MAX(POPUP_NO)+1,1), #{title}, #{input_type}, #{output_type}, #{size_width}, #{size_height}, #{view_width}, #{view_height}, 
+			#{link}, #{start_date}, #{end_date}, #{view_flag}, 'popup', #{atch_file_id}, SYSDATE(), #{contents} FROM R_POPUP
+	</insert>
+	
+	<update id="popup_update" parameterType="PopupVO">
+			UPDATE R_POPUP
+			SET	
+				TITLE 			= #{title},
+				INPUT_TYPE 		= #{input_type},
+				OUTPUT_TYPE 	= #{output_type},
+				SIZE_WIDTH 		= #{size_width},
+				SIZE_HEIGHT 	= #{size_height},
+				VIEW_WIDTH 		= #{view_width},
+				VIEW_HEIGHT 	= #{view_height},
+				LINK 			= #{link},
+				START_DATE 		= #{start_date},
+				END_DATE 		= #{end_date},
+				VIEW_FLAG 		= #{view_flag},
+				CONTENTS		= #{contents}
+				<if test="atch_file_id != null and atch_file_id != ''">
+					,ATCH_FILE_ID 	= #{atch_file_id}
+				</if>
+			WHERE
+				POPUP_NO = #{popup_no}
+	</update>
+	
+	
+	
+	
+	
+</mapper>

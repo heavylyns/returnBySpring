@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="returnProject.admin.service.impl.AdminMapper">
+
+	
+	<!-- 관리자 로그인 -->
+	<select id="adminLogin" resultType="adminVO">
+		SELECT ID, PASSWORD, NAME, ORGAN_NAME, DEPART_NAME, PHONE_NO1, PHONE_NO2, PHONE_NO3, ROLEID, REG_DATE
+		FROM R_ADMIN
+		WHERE ID = #{id} and PASSWORD = #{password}
+	</select>
+	<select id="getAdminRole" resultType="AdminRoleVO" parameterType="String">
+        SELECT ID, MENU_ID
+		  FROM R_ADMIN_ROLE
+         WHERE ID = #{id}
+	</select>
+	<select id="boardCnt" parameterType="String" resultType="AdminBoardVO">
+		
+		SELECT A.BOARD_CODE
+		     , A.BOARD_CNT
+		     , A.RECENT
+		     , CASE WHEN A.RECENT > DATE_ADD(CURDATE(), INTERVAL -3 DAY) THEN 'Y' 
+		       ELSE 'N' END AS NEW_FLAG
+		  FROM (
+		SELECT BOARD_CODE AS BOARD_CODE
+		     , COUNT(*) AS BOARD_CNT
+		     , MAX(DATE_FORMAT(REG_DATE, '%Y-%m-%d')) AS RECENT
+		  FROM R_BOARD A
+		 WHERE 1=1 
+		   AND A.DEL_YN = 'N'
+		   <![CDATA[
+		   AND DATE_FORMAT(REG_DATE, '%Y-%m-%d') <= CURDATE() 
+		   AND DATE_FORMAT(REG_DATE, '%Y-%m-%d') > DATE_ADD(CURDATE(), INTERVAL -7 DAY)
+		   ]]>
+		   AND BOARD_CODE = #{boardCode}
+		  GROUP BY BOARD_CODE) A
+	</select>
+	<select id="houseCnt" parameterType="String" resultType="AdminBoardVO">
+		SELECT A.BOARD_CODE, A.BOARD_CNT, A.RECENT
+		     ,  CASE WHEN A.RECENT > DATE_ADD(CURDATE(), INTERVAL - 3 DAY) THEN 'Y' ELSE 'N' END AS NEW_FLAG
+		  FROM (
+		SELECT '00' AS BOARD_CODE
+		     ,  COUNT(*) AS BOARD_CNT
+		     , MAX(DATE_FORMAT(REG_DATE, '%Y-%m-%d')) AS RECENT  
+		  FROM R_HOUSE A
+		  WHERE 1=1 
+		   AND A.DEL_YN = 'N'
+		   <![CDATA[
+		   AND DATE_FORMAT(REG_DATE, '%Y-%m-%d') <= CURDATE() 
+		   AND DATE_FORMAT(REG_DATE, '%Y-%m-%d') > DATE_ADD(CURDATE(), INTERVAL -7 DAY)
+		   ]]>
+		   ) A
+	</select>
+	<select id="recentVisitor" resultType="adminVO">
+	<![CDATA[
+		 SELECT VISIT_DATE, VISITOR_CNT 
+		   FROM r_visitor_stat 
+		  WHERE VISIT_DATE <= DATE_FORMAT(NOW(), '%Y-%m-%d') 
+		    AND VISIT_DATE > DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-%d'), INTERVAL -10 DAY)
+	]]>
+	</select>
+	<select id="monthlyVisitor" parameterType="String" resultType="adminVO">
+	<![CDATA[
+		  SELECT CONCAT(A.YEAR, '년 ', A.MONTH, '월') AS visit_date, SUM(VISITOR_CNT) AS visitor_cnt
+		    FROM (SELECT date_format(VISIT_DATE, '%Y') AS YEAR
+			   		   , date_format(VISIT_DATE, '%m') AS MONTH
+		               , VISITOR_CNT 
+				    FROM r_visitor_stat
+		           WHERE date_format(VISIT_DATE, '%Y') = #{year}
+				 ) A
+		   GROUP BY A.YEAR, A.MONTH
+	]]>
+	</select>
+	<select id="todayDateCheck" resultType="java.lang.Integer" parameterType="String">
+		SELECT COUNT(*) FROM R_VISITOR_STAT WHERE VISIT_DATE = #{visit_date}
+	</select>
+	<insert id="insertVisitorsDate">
+		INSERT INTO R_VISITOR_STAT (VISIT_DATE, VISITOR_CNT) VALUES (DATE_FORMAT(NOW(), '%Y-%m-%d'), 0)	
+	</insert>
+	<update id="updateVisitorsCnt">
+		UPDATE R_VISITOR_STAT
+		   SET VISITOR_CNT = VISITOR_CNT + 1
+		 WHERE VISIT_DATE = #{visit_date}
+	</update>
+</mapper>
